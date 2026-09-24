@@ -635,10 +635,17 @@ state.pembayaran.push({id:uid(),santriId:sid2,ta:ta3,tipe:tv.indexOf("SPP:")===0
 addLog("Pembayaran "+nama+" "+rupiah(nominal));saveState();render();showToast("Pembayaran tercatat ✅");}
 else if(form.dataset.form==="add-pengumuman"){e.preventDefault();var d6=Object.fromEntries(new FormData(form).entries());state.pengumuman=state.pengumuman||[];state.pengumuman.push({id:uid(),judul:d6.judul.trim(),isi:d6.isi.trim(),tanggal:d6.tanggal,penulis:d6.penulis.trim()||"Administrasi"});saveState();render();showToast("Pengumuman terbit 📢");}
 else if(form.dataset.form==="ganti-pin"){e.preventDefault();var d7=Object.fromEntries(new FormData(form).entries());var s6=state.santri.find(function(x){return x.id===state.session.santriId;});if(!s6)return;if(d7.pinBaru.length!==6||d7.pinBaru!==d7.pinUlang){showToast("PIN 6 digit & harus sama","error");return;}s6.pin=d7.pinBaru;saveState();render();showToast("PIN diganti");}});
+function loadServerData(cb){
+fetch("data-pondok.json?v="+Date.now()).then(function(r){if(!r.ok)throw new Error("tidak ada file");return r.json();}).then(function(d){
+if(d&&d.santri&&d.santri.length){var hasLocal=false;try{var p=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");hasLocal=!!(p&&p.santri&&p.santri.length);}catch(e){}
+if(!hasLocal){state=Object.assign(seed(),d);state.session=null;saveState();}}
+cb();}).catch(function(){cb();});}
 function boot(){
+loadServerData(function(){
 try{render();}
 catch(err){console.error(err);var app=document.getElementById("app");app.innerHTML='<div style="padding:24px;color:#546E7A;font-weight:700">Terjadi kesalahan saat memulai. Muat ulang halaman (refresh). Bila berulang, kirim foto layar ke developer.</div>';}
-setTimeout(function(){fixStaticLogos();var sp=document.getElementById("splash");if(sp){sp.classList.add("hide");setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},600);}},1000);}
+setTimeout(function(){fixStaticLogos();var sp=document.getElementById("splash");if(sp){sp.classList.add("hide");setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},600);}},1000);
+});}
 boot();
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
 </script>
