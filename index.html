@@ -500,16 +500,68 @@ function importSantriWB(wb){var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.uti
 var iNis=ix("NOMOR INDUK"),iNama=ix("NAMA SISWA"),iJk=ix("JENIS KELAMIN"),iKelas=ix("KELAS AKHIR"),iAyah=ix("NAMA AYAH"),iHpA=ix("NOMOR HP AYAH"),iWaA=ix("NOMOR WA AYAH"),iIbu=ix("NAMA IBU"),iHpI=ix("NOMOR HP IBU"),iWaI=ix("NOMOR WA IBU");var add=0;
 for(var i=hi+1;i<rows.length;i++){var rw=rows[i];if(!Array.isArray(rw))continue;var nis=String(rw[iNis]||"").trim();if(!nis||!/\d/.test(nis))continue;if(state.santri.some(function(x){return x.nik===nis;}))continue;var kr=String(rw[iKelas]||"");state.santri.push({id:uid(),nik:nis,nama:String(rw[iNama]||"").trim(),jk:String(rw[iJk]||"L").trim().toUpperCase().indexOf("L")===0?"L":"P",kelas:parseKelas(kr),tahunAjaran:"2026/2027",waliNama:String(rw[iAyah]||"").trim()||String(rw[iIbu]||"").trim()||"-",waliHp:normHp(rw[iWaA]||rw[iWaI]||rw[iHpA]||rw[iHpI]),pin:nis.slice(-6),status:"aktif"});add++;}
 return add;}
-function importPayWB(wb){var ws=wb.Sheets[wb.SheetNames[0]];var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});var hi=-1;for(var r=0;r<rows.length;r++){if(Array.isArray(rows[r])&&rows[r].some(function(c){return String(c).trim()==="NOMOR TRANSAKSI";})){hi=r;break;}}if(hi<0)return{p:0,sum:0};var H=rows[hi].map(function(h){return String(h).trim();});function ix(n){for(var i=0;i<H.length;i++){if(H[i].indexOf(n)===0)return i;}return -1;}
-var iTgl=ix("TANGGAL"),iNo=ix("NOMOR TRANSAKSI"),iMet=ix("METODE"),iNis=ix("NIS"),iNama=ix("NAMA"),iJk=ix("JENIS KELAMIN"),iKelas=ix("KELAS"),iPos=ix("POS PENERIMAAN"),iTa=ix("TAPEL POS PENERIMAAN"),iItem=ix("KETERANGAN ITEM"),iTer=ix("PENERIMAAN");var p=0,sum=0;
-for(var i=hi+1;i<rows.length;i++){var rw=rows[i];if(!Array.isArray(rw))continue;var nis=String(rw[iNis]||"").trim();var nominal=parseNum(rw[iTer]);if(!nis||!nominal)continue;var ta=String(rw[iTa]||"").trim()||"2026/2027";var pos=String(rw[iPos]||"").trim().toUpperCase();var kat=CATMAP[pos]||"Lainnya";var tanggal=parseDate(rw[iTgl]);var metode=String(rw[iMet]||"TUNAI").trim();var no=String(rw[iNo]||"");var s=ensureSantri(nis,String(rw[iNama]||"").trim(),String(rw[iJk]||"L").trim().toUpperCase().indexOf("L")===0?"L":"P",parseKelas(rw[iKelas]));
-var nama;
-if(pos==="SPP"){var mm2=String(rw[iItem]||"").match(/\(([A-Z]+)\)/);var ab=(mm2&&MONTH_ABBR[mm2[1]])?MONTH_ABBR[mm2[1]]:"JUL";var sp=getSpp(s.id,ta);if(!sp){sp={id:uid(),santriId:s.id,ta:ta,tarif:0,months:{}};state.spp.push(sp);}var c=sp.months[ab]||{t:0,b:0};c.b+=nominal;c.t=Math.max(c.t,c.b);sp.months[ab]=c;nama="SPP "+MONTH_ID[ab]+" "+ta;
-state.pembayaran.push({id:uid(),santriId:s.id,ta:ta,tipe:"SPP",bulan:ab,nama:nama,nominal:nominal,metode:metode,tanggal:tanggal,no:no});}
-else{var it=state.items.find(function(x){return x.santriId===s.id&&x.ta===ta&&x.kategori===kat;});if(!it){it={id:uid(),santriId:s.id,ta:ta,nama:kat,kategori:kat,tarif:0,terbayar:0};state.items.push(it);}it.terbayar+=nominal;it.tarif=Math.max(it.tarif,it.terbayar);nama=kat;
-state.pembayaran.push({id:uid(),santriId:s.id,ta:ta,tipe:"ITEM",refId:it.id,nama:nama,nominal:nominal,metode:metode,tanggal:tanggal,no:no});}
-p++;sum+=nominal;}
-return{p:p,sum:sum};}
+function catFromDesc(dU){
+  if(dU.indexOf("SPP")===0)return "SPP";
+  if(dU.indexOf("PENGEMBANGAN")===0)return "Pengembangan";
+  if(dU.indexOf("SERAGAM")===0)return "Seragam";
+  if(dU.indexOf("PENDAFTARAN")===0)return "Pendaftaran";
+  if(dU.indexOf("KESEHATAN")===0)return "Kesehatan";
+  if(dU.indexOf("FC UJIAN")===0)return "FC Ujian";
+  if(dU.indexOf("EKSTRA")===0)return "Extrakurikuler";
+  if(dU.indexOf("BUKU")===0)return "Buku";
+  if(dU.indexOf("AKHIRUSSANAH")===0)return "Akhirussanah";
+  if(dU.indexOf("KEGIATAN NIHA")===0)return "Kegiatan Niha'i";
+  return "Lainnya";
+}
+function importPayWB(wb){
+  var ws=wb.Sheets[wb.SheetNames[0]];
+  var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
+  var flat=false,r0,g,rw,joined;
+  for(r0=0;r0<rows.length;r0++){ if(Array.isArray(rows[r0])&&rows[r0].some(function(c){return String(c).trim()==="POS PENERIMAAN";})){flat=true;break;} }
+  var added=0,sum=0;
+  if(flat){
+    var hi=-1,r,H;
+    for(r=0;r<rows.length;r++){ if(Array.isArray(rows[r])&&rows[r].some(function(c){return String(c).trim()==="NOMOR TRANSAKSI";})){hi=r;break;} }
+    if(hi<0)return{p:0,sum:0};
+    H=rows[hi].map(function(h){return String(h).trim();});
+    function ix(n){for(var i=0;i<H.length;i++){if(H[i].indexOf(n)===0)return i;}return -1;}
+    var iTgl=ix("TANGGAL"),iNo=ix("NOMOR TRANSAKSI"),iMet=ix("METODE"),iNis=ix("NIS"),iItem=ix("KETERANGAN ITEM"),iTer=ix("PENERIMAAN");
+    for(var i=hi+1;i<rows.length;i++){ rw=rows[i]; if(!Array.isArray(rw))continue;
+      var nis=String(rw[iNis]||"").trim(); var nominal=parseNum(rw[iTer]); if(!nis||!nominal)continue;
+      var s=state.santri.find(function(x){return x.nik===nis;}); if(!s)continue;
+      var desk=String(rw[iItem]||""); var dU=desk.toUpperCase();
+      var mTa=dU.match(/TP\s+(\d{4}\/\d{4})/); var ta2=mTa?mTa[1]:"2026/2027";
+      var mMo=dU.match(/\(([A-Z]+)\)/); var mo=mMo?(MONTH_ABBR[mMo[1]]||""):"";
+      state.pembayaran.push({id:uid(),santriId:s.id,ta:ta2,tipe:(catFromDesc(dU)==="SPP"?"SPP":"ITEM"),bulan:mo||undefined,nama:desk,nominal:nominal,metode:String(rw[iMet]||"").trim(),tanggal:parseDate(rw[iTgl]),no:String(rw[iNo]||""),kategori:catFromDesc(dU)});
+      added++; sum+=nominal;
+    }
+    return{p:added,sum:sum};
+  } else {
+    var cur=null;
+    for(g=0;g<rows.length;g++){ rw=rows[g]; if(!Array.isArray(rw))continue;
+      joined=rw.join(" | ");
+      var mNis=joined.match(/:\s*(\d{7})\b/);
+      if(mNis&&/NIS/.test(joined)){ cur=mNis[1]; continue; }
+      if(/Sub Total/i.test(joined))continue;
+      if(/Nomor Transaksi/.test(joined)&&/Deskripsi/.test(joined))continue;
+      var tglM=joined.match(/(\d{2}-\d{2}-\d{4})/);
+      var sisM=joined.match(/(SIS\d{10,})/);
+      if(!tglM||!sisM||!cur)continue;
+      var nums=[]; for(var k=0;k<rw.length;k++){ var v=rw[k]; if(isNumV(v)&&!/^\d{1,3}\.$/.test(v))nums.push(parseNumV(v)); }
+      if(!nums.length)continue;
+      var nominal2=nums[nums.length-1];
+      var desk2=""; for(var k2=0;k2<rw.length;k2++){ if(/TP\s+\d{4}\/\d{4}/.test(String(rw[k2]))){ desk2=String(rw[k2]); break; } }
+      if(!desk2)continue;
+      var s2=state.santri.find(function(x){return x.nik===cur;}); if(!s2)continue;
+      var dU2=desk2.toUpperCase();
+      var mTa2=dU2.match(/TP\s+(\d{4}\/\d{4})/); var ta3=mTa2?mTa2[1]:"2026/2027";
+      var mMo2=dU2.match(/\(([A-Z]+)\)/); var mo2=mMo2?(MONTH_ABBR[mMo2[1]]||""):"";
+      state.pembayaran.push({id:uid(),santriId:s2.id,ta:ta3,tipe:(catFromDesc(dU2)==="SPP"?"SPP":"ITEM"),bulan:mo2||undefined,nama:desk2,nominal:nominal2,metode:"-",tanggal:parseDate(tglM[1]),no:sisM[1],kategori:catFromDesc(dU2)});
+      added++; sum+=nominal2;
+    }
+    return{p:added,sum:sum};
+  }
+}
 function importSnapshotWB(wb){
 var parsed={};var order=[];var cur=null;
 for(var si=0;si<wb.SheetNames.length;si++){
