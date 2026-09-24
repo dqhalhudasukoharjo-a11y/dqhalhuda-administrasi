@@ -563,59 +563,70 @@ function importPayWB(wb){
   }
 }
 function importSnapshotWB(wb){
-var parsed={};var order=[];var cur=null;
-for(var si=0;si<wb.SheetNames.length;si++){
-var rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[si]],{header:1,raw:true,defval:""});
-for(var r=0;r<rows.length;r++){
-var c=collapseRow(rows[r]);if(!c.length)continue;
-var joined=c.join(" | ");
-var mNis=joined.match(/:\s*(\d{7})\b/);
-if(mNis&&/NIS/i.test(joined)){var ex=parsed[mNis[1]];if(ex){cur=ex;}else{cur={nis:mNis[1],nama:"",kelas:"",ta:"",items:[]};parsed[cur.nis]=cur;order.push(cur.nis);}continue;}
-if(!cur)continue;
-if(/^Nama\s*:/.test(c[0])&&c[1]){cur.nama=c[1];continue;}
-var mK=joined.match(/KELAS\s+(\d)\s+(PUTRA|PUTRI)/i);
-if(mK){cur.kelas=mK[1]+" "+(mK[2].toUpperCase()==="PUTRA"?"Putra":"Putri");var mTa=joined.match(/\[(\d{4}\/\d{4})\]/);if(mTa)cur.ta=mTa[1];continue;}
-if(/Jumlah/.test(joined))continue;
-var itemIdx=-1,ta="",kat="";
-for(var k=0;k<c.length;k++){var mI=String(c[k]).match(ITEM_RE);if(mI){itemIdx=k;kat=mI[1].toUpperCase();ta=mI[2];break;}}
-if(itemIdx<0)continue;
-var bulan="";for(var k2=0;k2<c.length;k2++){var mB=String(c[k2]).match(MONTH_RE);if(mB){bulan=MONTH_NAME_MAP[mB[1]]||"";break;}}
-var nums=[];for(var k3=0;k3<c.length;k3++){var vv=c[k3];if(isNumV(vv)&&!/^\d{1,3}\.$/.test(vv))nums.push(parseNumV(vv));}
-var t=0,b=0,s=0;
-if(nums.length>=3){t=nums[0];b=nums[1];s=nums[2];}
-else if(nums.length===2){t=nums[0];s=nums[1];b=t-s;}
-else if(nums.length===1){t=nums[0];b=t;s=0;}
-else continue;
-if(b+s!==t)b=Math.max(t-s,0);
-cur.items.push({kat:kat,ta:ta,bulan:bulan,t:t,b:b});
-}}
-var nSantri=0,nPos=0,sumT=0,sumB=0;
-order.forEach(function(nis){
-var P=parsed[nis];if(!P||!P.items||!P.items.length)return;
-var s=state.santri.find(function(x){return x.nik===nis;});
-if(!s){s={id:uid(),nik:nis,nama:P.nama||"-",jk:(P.kelas.indexOf("Putri")>=0?"P":"L"),kelas:P.kelas||"-",tahunAjaran:P.ta||"2026/2027",waliNama:"-",waliHp:"-",pin:nis.slice(-6),status:"aktif"};state.santri.push(s);}
-else{if(P.nama)s.nama=P.nama;if(P.kelas)s.kelas=P.kelas;}
-nSantri++;
-var tas={};P.items.forEach(function(it){tas[it.ta]=1;});
-Object.keys(tas).forEach(function(ta){
-state.spp=state.spp.filter(function(x){return !(x.santriId===s.id&&x.ta===ta);});
-state.items=state.items.filter(function(x){return !(x.santriId===s.id&&x.ta===ta);});
-});
-P.items.forEach(function(it){
-nPos++;sumT+=it.t;sumB+=it.b;
-var kat2=CATMAP[it.kat]||it.kat;
-if(it.kat==="SPP"&&it.bulan){
-var sp=state.spp.find(function(x){return x.santriId===s.id&&x.ta===it.ta;});
-if(!sp){sp={id:uid(),santriId:s.id,ta:it.ta,tarif:0,months:{}};state.spp.push(sp);}
-sp.months[it.bulan]={t:it.t,b:it.b};
-sp.tarif=it.t;
-}else{
-state.items.push({id:uid(),santriId:s.id,ta:it.ta,nama:kat2,kategori:kat2,tarif:it.t,terbayar:it.b});
+  var ws=wb.Sheets[wb.SheetNames[0]];
+  var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
+  var cur=null, seen={}, nPos=0, sumT=0, sumB=0;
+  for(var r=0;r<rows.length;r++){
+    var rw=rows[r]; if(!Array.isArray(rw))continue;
+    var joined=collapseRow(rw).join(" | ");
+    var mNis=joined.match(/:\s*(\d{7})\b/);
+    var nama="",kelas="";
+    for(var k=0;k<rw.length;k++){
+      var cell=String(rw[k]||"").trim();
+      if(/^Nama\s*:?$/.test(cell)){
+        for(var k2=k+1;k2<rw.length;k2++){
+          var v=String(rw[k2]||"").trim().replace(/^:+\s*/,"").trim();
+          if(v && v!=="Status" && v!=="Nama"){ nama=v; break; }
+        }
+      }
+      var mK=cell.match(/KELAS\s+(\d)\s+(PUTRA|PUTRI)/i);
+      if(mK) kelas=mK[1]+" "+(mK[2].toUpperCase()==="PUTRA"?"Putra":"Putri");
+    }
+    var isHeader=/Nama/.test(joined)&&/Aktif/i.test(joined);
+    if(isHeader&&(nama||mNis)){
+      var s=null;
+      if(mNis) s=state.santri.find(function(x){return x.nik===mNis[1];});
+      if(!s&&nama) s=state.santri.find(function(x){return x.nama.toLowerCase()===nama.toLowerCase()&&(!kelas||x.kelas===kelas);});
+      if(!s&&nama) s=state.santri.find(function(x){return x.nama.toLowerCase()===nama.toLowerCase();});
+      cur=s||null;
+      if(s) seen[s.id]=1;
+      continue;
+    }
+    if(/Jumlah/.test(joined))continue;
+    if(!cur)continue;
+    if(!/TP\s+\d{4}\/\d{4}/.test(joined))continue;
+    var itemName="",bulan="";
+    for(var k3=0;k3<rw.length;k3++){
+      var cc=String(rw[k3]||"").trim();
+      if(/^[A-Z' ]+\s+TP\s+\d{4}\/\d{4}$/i.test(cc)&&!itemName) itemName=cc;
+      var mB=cc.match(/^(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+\d{4}$/i);
+      if(mB&&!bulan) bulan=MONTH_NAME_MAP[mB[1]]||"";
+    }
+    if(!itemName)continue;
+    var nums=[]; for(var k4=0;k4<rw.length;k4++){ var vv=rw[k4]; if(isNumV(vv)&&!/^\d{1,3}\.$/.test(vv)) nums.push(parseNumV(vv)); }
+    var t=0,b=0,s2=0;
+    if(nums.length>=3){t=nums[0];b=nums[1];s2=nums[2];}
+    else if(nums.length===2){t=nums[0];s2=nums[1];b=t-s2;}
+    else if(nums.length===1){t=nums[0];b=t;s2=0;}
+    else continue;
+    if(b+s2!==t)b=Math.max(t-s2,0);
+    var mTa=itemName.match(/TP\s+(\d{4}\/\d{4})/); var ta=mTa?mTa[1]:"2026/2027";
+    var kat=catFromDesc(itemName.toUpperCase());
+    nPos++; sumT+=t; sumB+=b;
+    if(kat==="SPP"&&bulan){
+      var sp=state.spp.find(function(x){return x.santriId===cur.id&&x.ta===ta;});
+      if(!sp){sp={id:uid(),santriId:cur.id,ta:ta,tarif:0,months:{}};state.spp.push(sp);}
+      sp.months[bulan]={t:t,b:b}; sp.tarif=t;
+    } else {
+      var ex=state.items.find(function(x){return x.santriId===cur.id&&x.ta===ta&&x.kategori===kat;});
+      if(ex){ ex.tarif=t; ex.terbayar=b; }
+      else state.items.push({id:uid(),santriId:cur.id,ta:ta,nama:kat,kategori:kat,tarif:t,terbayar:b});
+    }
+  }
+  var nSantri=Object.keys(seen).length;
+  addLog("Import snapshot: "+nSantri+" santri, "+nPos+" pos");
+  return {nSantri:nSantri,nPos:nPos,sumT:sumT,sumB:sumB};
 }
-});
-});
-addLog("Import snapshot: "+nSantri+" santri, "+nPos+" pos");
-return{nSantri:nSantri,nPos:nPos,sumT:sumT,sumB:sumB};}
 function readWB(f){return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(e){try{res(XLSX.read(new Uint8Array(e.target.result),{type:"array"}));}catch(err){rej(err);}};fr.onerror=rej;fr.readAsArrayBuffer(f);});}
 document.addEventListener("click",function(e){var btn=e.target.closest("[data-action]");if(!btn)return;var a=btn.dataset.action;
 if(a==="login-tab"){loginTab=btn.dataset.tab;render();}
