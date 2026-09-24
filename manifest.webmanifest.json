@@ -1,0 +1,16 @@
+{
+  "name": "DQH AL-HUDA - Administrasi Santri",
+  "short_name": "DQH Admin",
+  "description": "Portal administrasi & monitoring pembayaran santri DQH AL-HUDA Sukoharjo",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#073B44",
+  "theme_color": "#073B44",
+  "icons": [
+    { "src": "logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
