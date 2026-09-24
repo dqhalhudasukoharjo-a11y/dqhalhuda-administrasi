@@ -517,7 +517,7 @@ function importPayWB(wb){
   var ws=wb.Sheets[wb.SheetNames[0]];
   var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
   var flat=false,r0,g,rw,joined;
-  for(r0=0;r0<rows.length;r0++){ if(Array.isArray(rows[r0])&&rows[r0].some(function(c){return String(c).trim()==="POS PENERIMAAN";})){flat=true;break;} }
+  for(r0=0;r0<rows.length;r0++){ if(Array.isArray(rows[r0])&&rows[r0].some(function(c){return String(c).trim().indexOf("POS PENERIMAAN")>=0;})){flat=true;break;} }
   var added=0,sum=0;
   if(flat){
     var hi=-1,r,H;
@@ -684,7 +684,7 @@ else if(form.dataset.form==="add-santri"){e.preventDefault();var d3=Object.fromE
 else if(form.dataset.form==="gen-ta"){e.preventDefault();var d4=Object.fromEntries(new FormData(form).entries());var ta=d4.ta.trim();var defs=[+d4.spp1,+d4.spp2,+d4.spp3];var itemDefs=ITEM_TPL_DEF.map(function(t,i){return +d4["def"+i]||t.def;});var n=0;
 state.santri.filter(function(s){return s.status==="aktif";}).forEach(function(s){var cls=+s.kelas.charAt(0)||1;var tarif=defs[cls-1]||defs[0];var sp=getSpp(s.id,ta);
 if(!sp){sp={id:uid(),santriId:s.id,ta:ta,tarif:tarif,months:{}};MONTHS.forEach(function(m){sp.months[m]={t:tarif,b:0};});state.spp.push(sp);}
-else{sp.tarif=tarif;MONTHS.forEach(function(m){var c=sp.months[m]||{t:0,b:0};c.t=Math.max(tarif,c.b);sp.months[m]=c;});}
+else{var realTarif=sp.tarif||tarif;MONTHS.forEach(function(m){var c=sp.months[m]||{t:0,b:0};if(!c.t)c.t=realTarif;sp.months[m]=c;});}
 ITEM_TPL_DEF.forEach(function(tpl,i){if(tpl.untuk==="kelas3"&&cls!==3)return;var def=itemDefs[i];var it=state.items.find(function(x){return x.santriId===s.id&&x.ta===ta&&x.kategori===tpl.kat;});if(!it)state.items.push({id:uid(),santriId:s.id,ta:ta,nama:tpl.kat,kategori:tpl.kat,tarif:def,terbayar:0});else it.tarif=Math.max(def,it.terbayar);});n++;});
 addLog("Generate TA "+ta+" untuk "+n+" santri");saveState();render();showToast("TA "+ta+": kewajiban "+n+" santri terbentuk ⚡");}
 else if(form.dataset.form==="set-spp"){e.preventDefault();var sid=state.tarifSantri;if(!sid){showToast("Pilih santri dulu","error");return;}var s5=state.santri.find(function(x){return x.id===sid;});var ta5=s5?latestTA(s5.id):"";var sp5=getSpp(sid,ta5);if(!sp5){showToast("Belum ada kewajiban SPP. Generate TA atau Import Snapshot dulu.","error");return;}var d5=Object.fromEntries(new FormData(form).entries());var n5=Number(String(d5.tarif).replace(/[^0-9]/g,""));if(!n5){showToast("Nominal tidak valid","error");return;}sp5.tarif=n5;MONTHS.forEach(function(m){var c=sp5.months[m];if(c)c.t=Math.max(n5,c.b);});addLog("Tarif SPP "+s5.nama+" = "+rupiah(n5));saveState();render();showToast("Tarif SPP diterapkan ke 12 bulan ✅");}
