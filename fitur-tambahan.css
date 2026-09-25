@@ -1,41 +1,55 @@
-/* ==== FITUR TAMBAHAN: tampilan, tema gelap, tren, kwitansi ==== */
-.wh-logo{width:40px;height:40px;min-width:40px;padding:4px}
-.wt-logo{width:32px;height:32px;min-width:32px;padding:3px}
-.sb-logo{width:34px;height:34px;min-width:34px;padding:4px}
-.ah-logo{width:32px;height:32px;min-width:32px;padding:4px}
-.splash-logo{width:96px;height:96px;padding:8px}
-.login-logoimg{width:120px;height:120px}
-.wali-container{max-width:620px}
-.bill-list{gap:10px}
-.bill-card{padding:12px}
-.wh-card{padding:12px}
-.wb-row{padding:6px 0}
-.spp-grid{gap:6px}
-.card{padding:16px}
-.mcard{padding:12px}
-.theme-btn{margin-left:auto;padding:8px 12px;border-radius:12px;background:var(--slate-bg);color:var(--slate);font-weight:800;font-size:12.5px}
-.wali-topbar .theme-btn{margin-left:6px}
+/* ============ FITUR TAMBAHAN v2 ============ */
+/* Logo: batalkan crop & perkecil proporsional */
+body .logo-box img.crop{position:static;width:100%;height:100%;left:auto;top:auto;transform:none;object-fit:contain}
+body .wt-logo{width:34px;height:34px;min-width:34px;padding:3px;border-radius:10px}
+body .wh-logo{width:46px;height:46px;min-width:46px;padding:4px;border-radius:12px}
+body .sb-logo{width:36px;height:36px;min-width:36px;padding:4px}
+body .ah-logo{width:32px;height:32px;min-width:32px;padding:3px}
+body .splash-logo{width:104px;height:104px;padding:10px}
+body .login-logoimg{width:126px;height:126px}
+/* Polish kreatif */
+.bill-card,.mcard,.tl-card,.card{transition:transform .18s ease,box-shadow .18s ease}
+.bill-card:hover,.mcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,114,133,.16)}
+.sec-title{position:relative;padding-bottom:6px}
+.sec-title::after{content:"";position:absolute;left:0;bottom:0;width:36px;height:3px;border-radius:99px;background:var(--grad-orange)}
+.bill-icon{box-shadow:0 6px 16px rgba(7,59,68,.22)}
+.bill-sisa{font-weight:800;color:var(--orange-dark)}
+.theme-btn{border-radius:999px;padding:8px 14px;letter-spacing:.2px}
+.wb-chip{backdrop-filter:blur(6px)}
 .trend-svg{width:100%;height:110px;background:var(--teal-soft);border-radius:12px}
 .trend-note{font-size:11.5px;color:var(--muted);margin-top:6px}
-.kw-mask{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:grid;place-items:center;padding:16px}
+.kw-mask{position:fixed;inset:0;background:rgba(4,20,24,.6);backdrop-filter:blur(3px);z-index:999;display:grid;place-items:center;padding:16px}
 .kw-box{background:#fff;border-radius:20px;max-width:430px;width:100%;padding:14px;max-height:92vh;overflow:auto}
 .kw-box img{width:100%;border-radius:12px;border:1px solid var(--line)}
 .kw-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-[data-theme="gelap"]{--bg:#0c1a1d;--text:#e3f2f0;--muted:#9cb6b3;--line:#1d3a3a;--teal-soft:#103031;--orange-soft:#332417;--success-bg:#0f2e22;--warning-bg:#33240f;--slate-bg:#1d2b2a;--shadow:0 10px 30px rgba(0,0,0,.35)}
-[data-theme="gelap"] body{background-color:var(--bg)}
-[data-theme="gelap"] .card,[data-theme="gelap"] .bill-card,[data-theme="gelap"] .mcard,[data-theme="gelap"] .tl-card,[data-theme="gelap"] .prof-card,[data-theme="gelap"] .ann-card,[data-theme="gelap"] .kw-box{background:#10262a;border-color:#1d3a3a}
-[data-theme="gelap"] .wali-topbar,[data-theme="gelap"] .bottom-nav,[data-theme="gelap"] .admin-tabs{background:#0c1a1d;border-color:#1d3a3a}
-[data-theme="gelap"] input,[data-theme="gelap"] select,[data-theme="gelap"] textarea{background:#0e2225;color:var(--text);border-color:#1d3a3a}
-[data-theme="gelap"] .btn-light{background:#1d3a3a;color:#cfe8e4}
-[data-theme="gelap"] .btn-danger{background:#2a1d1d;color:#e4cfcf}
-[data-theme="gelap"] .fc{background:#10262a;color:var(--muted);border-color:#1d3a3a}
-[data-theme="gelap"] .st-nol{background:#1d3a3a;color:var(--muted)}
-[data-theme="gelap"] .badge-kat{background:#103031;color:#9fd8d0}
-[data-theme="gelap"] .badge-lunas{background:#0f2e22;color:#7fd8a8}
-[data-theme="gelap"] .badge-sebagian{background:#33240f;color:#f0c070}
-[data-theme="gelap"] .badge-belum{background:#1d2b2a;color:#b0c4c2}
-[data-theme="gelap"] .theme-btn{background:#1d3a3a;color:#cfe8e4}
-[data-theme="gelap"] .trend-svg{background:#103031}
-[data-theme="gelap"] .demo-box,[data-theme="gelap"] .card-info{background:#332417;border-color:#7a5a30;color:#f0d0a0}
-[data-theme="gelap"] .link-btn{background:#1d2b2a;color:#9cb6b3}
-[data-theme="gelap"] tbody tr:hover{background:#0e2225}
+/* ============ MODE GELAP MENYELURUH ============ */
+html[data-theme="gelap"]{--bg:#0b181b;--text:#e6f3f1;--muted:#9db8b4;--line:#1c3a39;--teal-soft:#0f2f2e;--orange-soft:#33241a;--success-bg:#0e2e21;--warning-bg:#33240f;--slate-bg:#1c2b2a;--shadow:0 10px 30px rgba(0,0,0,.4)}
+html[data-theme="gelap"] body{background-color:var(--bg);background-image:radial-gradient(rgba(18,176,190,.05) 1px,transparent 1px)}
+html[data-theme="gelap"] .card,html[data-theme="gelap"] .bill-card,html[data-theme="gelap"] .mcard,html[data-theme="gelap"] .tl-card,html[data-theme="gelap"] .prof-card,html[data-theme="gelap"] .ann-card,html[data-theme="gelap"] .kw-box{background:#0f2524;border-color:#1c3a39}
+html[data-theme="gelap"] .wali-topbar,html[data-theme="gelap"] .bottom-nav,html[data-theme="gelap"] .admin-tabs{background:#0b181b;border-color:#1c3a39}
+html[data-theme="gelap"] input,html[data-theme="gelap"] select,html[data-theme="gelap"] textarea{background:#0d211f;color:var(--text);border-color:#1c3a39}
+html[data-theme="gelap"] .btn-light{background:#1c3a39;color:#cfeae6}
+html[data-theme="gelap"] .btn-danger{background:#2a1c1c;color:#e6cfcf}
+html[data-theme="gelap"] .btn-white{background:#0f2524;color:#9fd8d0}
+html[data-theme="gelap"] .fc,html[data-theme="gelap"] .at-chip{background:#0f2524;color:var(--muted);border-color:#1c3a39}
+html[data-theme="gelap"] .wt-link,html[data-theme="gelap"] .bn-item{color:#9db8b4}
+html[data-theme="gelap"] .st-nol,html[data-theme="gelap"] .spp-cell.st-nol{background:#1c3a39;color:var(--muted);box-shadow:none}
+html[data-theme="gelap"] .badge-kat{background:#0f2f2e;color:#9fd8d0}
+html[data-theme="gelap"] .badge-lunas{background:#0e2e21;color:#8fe0b0}
+html[data-theme="gelap"] .badge-sebagian{background:#33240f;color:#f2c37b}
+html[data-theme="gelap"] .badge-belum{background:#1c2b2a;color:#b6cac7}
+html[data-theme="gelap"] .theme-btn{background:#1c3a39;color:#cfeae6}
+html[data-theme="gelap"] .trend-svg{background:#0f2f2e}
+html[data-theme="gelap"] .demo-box,html[data-theme="gelap"] .card-info{background:#33241a;border-color:#7a5a30;color:#f0d3a6}
+html[data-theme="gelap"] .link-btn{background:#1c2b2a;color:#9db8b4}
+html[data-theme="gelap"] tbody tr:hover{background:#0d211f}
+html[data-theme="gelap"] th{color:#9db8b4}
+html[data-theme="gelap"] td,html[data-theme="gelap"] th{border-color:#1c3a39}
+html[data-theme="gelap"] .tl::before{background:linear-gradient(180deg,#F7931E,#1c3a39)}
+html[data-theme="gelap"] .tl-dot{box-shadow:0 0 0 4px #0f2524}
+html[data-theme="gelap"] .hbar-track,html[data-theme="gelap"] .mini-progress{background:#1c3a39}
+html[data-theme="gelap"] .vbar-fill::after{color:#FFC24B}
+html[data-theme="gelap"] .empty,html[data-theme="gelap"] .trend-note{color:#9db8b4}
+html[data-theme="gelap"] .kw-box img{border-color:#1c3a39}
+html[data-theme="gelap"] .prof-row{border-color:#1c3a39}
+html[data-theme="gelap"] .wb-row{border-color:rgba(255,255,255,.18)}
