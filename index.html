@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="DQH AL-HUDA"/>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="apple-touch-icon" href="logo.png"/>
-<title>DQH AL-HUDA • Administrasi Santri</title>
+<title>DQH AL-HUDA • Pemantauan Administrasi Santri</title>
 <style>
 :root{--teal:#0FA3B1;--teal-dark:#0B7285;--teal-deep:#073B44;--teal-soft:#E6F7F9;--orange:#F76707;--orange-dark:#D9480F;--orange-soft:#FFF3E8;--bg:#F2F8F9;--text:#0B2B33;--muted:#5E7680;--line:#DCEBED;--success:#067647;--success-bg:#E8F7EF;--warning:#B54708;--warning-bg:#FFF6E6;--slate:#546E7A;--slate-bg:#ECEFF1;--r:20px;--shadow:0 10px 30px rgba(11,114,133,.10);--grad-teal:linear-gradient(135deg,#12B0BE,#0B7285);--grad-orange:linear-gradient(135deg,#FF922B,#E8590C);--head-h:56px}
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
@@ -511,7 +511,7 @@ function catFromDesc(dU){
   if(dU.indexOf("EKSTRA")===0)return "Extrakurikuler";
   if(dU.indexOf("BUKU")===0)return "Buku";
   if(dU.indexOf("AKHIRUSSANAH")===0)return "Akhirussanah";
-  if(dU.indexOf("KEGIATAN NIHA")===0)return "Kegiatan Niha'i";
+  if(dU.indexOf("KEGIATAN NIHA'I")===0)return "Kegiatan Niha'i";
   return "Lainnya";
 }
 function importPayWB(wb){
