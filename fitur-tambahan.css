@@ -1,4 +1,4 @@
-/* ============ FITUR TAMBAHAN v2 ============ */
+/* ==== FITUR TAMBAHAN CSS v3 ==== */
 /* Logo: batalkan crop & perkecil proporsional */
 body .logo-box img.crop{position:static;width:100%;height:100%;left:auto;top:auto;transform:none;object-fit:contain}
 body .wt-logo{width:34px;height:34px;min-width:34px;padding:3px;border-radius:10px}
@@ -7,14 +7,41 @@ body .sb-logo{width:36px;height:36px;min-width:36px;padding:4px}
 body .ah-logo{width:32px;height:32px;min-width:32px;padding:3px}
 body .splash-logo{width:104px;height:104px;padding:10px}
 body .login-logoimg{width:126px;height:126px}
-/* Polish kreatif */
-.bill-card,.mcard,.tl-card,.card{transition:transform .18s ease,box-shadow .18s ease}
-.bill-card:hover,.mcard:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,114,133,.16)}
-.sec-title{position:relative;padding-bottom:6px}
-.sec-title::after{content:"";position:absolute;left:0;bottom:0;width:36px;height:3px;border-radius:99px;background:var(--grad-orange)}
-.bill-icon{box-shadow:0 6px 16px rgba(7,59,68,.22)}
-.bill-sisa{font-weight:800;color:var(--orange-dark)}
+/* Polos & keterbacaan */
+html{scroll-behavior:smooth}
+::selection{background:rgba(247,103,7,.25)}
+body .stat-value,body .wb-row b,body .bill-sisa,body .tl-amt,body .sc-sub,body .mcard-row{font-variant-numeric:tabular-nums}
+body .ann-isi{line-height:1.75}
+body .ib-msg{line-height:1.8}
+body ::-webkit-scrollbar{width:8px;height:8px}
+body ::-webkit-scrollbar-thumb{background:#B9D4D8;border-radius:99px}
+body ::-webkit-scrollbar-track{background:transparent}
+html[data-theme="gelap"] ::-webkit-scrollbar-thumb{background:#274a49}
+body,body .card,body .bill-card,body .mcard,body .tl-card,body .prof-card,body .ann-card,body .wali-topbar,body .bottom-nav,body input,body select,body textarea{transition:background-color .25s ease,color .25s ease,border-color .25s ease,transform .18s ease,box-shadow .18s ease}
+/* Animasi muncul berurutan */
+body .bill-list>.bill-card{animation:fadeUp .5s cubic-bezier(.22,.9,.3,1) both}
+body .bill-list>.bill-card:nth-child(1){animation-delay:.04s}
+body .bill-list>.bill-card:nth-child(2){animation-delay:.10s}
+body .bill-list>.bill-card:nth-child(3){animation-delay:.16s}
+body .bill-list>.bill-card:nth-child(4){animation-delay:.22s}
+body .bill-list>.bill-card:nth-child(5){animation-delay:.28s}
+body .bill-list>.bill-card:nth-child(6){animation-delay:.34s}
+body .bill-list>.bill-card:nth-child(7){animation-delay:.40s}
+body .bill-list>.bill-card:nth-child(8){animation-delay:.46s}
+body .tl-item{animation:fadeUp .45s ease both}
+body .tl-item:nth-child(odd){animation-delay:.05s}
+body .tl-item:nth-child(even){animation-delay:.12s}
+/* Hover lembut */
+body .bill-card:hover,body .mcard:hover,body .tl-card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(11,114,133,.16)}
+body .stat-card:hover{transform:translateY(-3px)}
+body .fc:hover,body .wt-link:hover,body .at-chip:hover{transform:translateY(-1px)}
+/* Bulan berjalan berdenyut */
+@keyframes nowPulse{0%,100%{box-shadow:0 0 0 3px var(--orange),0 8px 20px rgba(217,72,15,.25)}50%{box-shadow:0 0 0 6px rgba(247,103,7,.45),0 8px 20px rgba(217,72,15,.25)}}
+body .spp-cell.now{animation:nowPulse 2.6s ease-in-out infinite}
+/* Komponen tambahan */
 .theme-btn{border-radius:999px;padding:8px 14px;letter-spacing:.2px}
+.theme-btn-on-dark{background:rgba(255,255,255,.18)!important;color:#fff!important}
+.sidebar .theme-btn{width:100%;text-align:left;border-radius:13px;padding:12px 14px;font-size:14px;font-weight:700;background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}
 .wb-chip{backdrop-filter:blur(6px)}
 .trend-svg{width:100%;height:110px;background:var(--teal-soft);border-radius:12px}
 .trend-note{font-size:11.5px;color:var(--muted);margin-top:6px}
@@ -22,7 +49,83 @@ body .login-logoimg{width:126px;height:126px}
 .kw-box{background:#fff;border-radius:20px;max-width:430px;width:100%;padding:14px;max-height:92vh;overflow:auto}
 .kw-box img{width:100%;border-radius:12px;border:1px solid var(--line)}
 .kw-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-/* ============ MODE GELAP MENYELURUH ============ */
+/* ==== RESPONSIF: TABLET ==== */
+@media(max-width:1023px){body .wali-container{max-width:720px}}
+@media(max-width:999px){
+body .admin-content{padding:14px 14px 40px}
+body .stat-card{padding:14px}
+body .stat-value{font-size:17px}
+}
+/* ==== RESPONSIF: HP ==== */
+@media(max-width:640px){
+body .wali-head{padding:16px 14px 20px}
+body .wh-card{padding:12px;gap:10px}
+body .wh-donut-wrap{width:88px;height:88px;min-width:88px}
+body .wh-donut-wrap .donut{width:88px;height:88px}
+body .wb-row{font-size:11.5px;padding:5px 0}
+body .wb-row b{font-size:12px}
+body .wb-chip{font-size:10px;padding:4px 8px}
+body .wali-body{padding:14px 12px 0}
+body .card{padding:14px}
+body .card h3{font-size:14.5px}
+body .sec-title{font-size:15px}
+body .bill-card{padding:11px;gap:10px}
+body .bill-icon{width:40px;height:40px;min-width:40px;font-size:18px;border-radius:12px}
+body .bill-name{font-size:13.5px}
+body .bill-meta{font-size:11px}
+body .bill-sisa{font-size:10.5px}
+body .tl-card{padding:11px 12px}
+body .tl-name{font-size:13px}
+body .tl-amt{font-size:12.5px}
+body .tl-sub{font-size:10.5px;gap:6px}
+body .spp-grid{gap:6px}
+body .spp-cell{padding:7px 4px;border-radius:12px}
+body .spp-cell .m{font-size:11px}
+body .spp-cell .v{font-size:9px}
+body .bottom-nav{padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+body .bn-item{font-size:9px;min-height:42px;gap:3px}
+body .bn-item svg{width:19px;height:19px}
+body .fc{padding:7px 12px;font-size:12px}
+body .page-title{font-size:20px}
+body .page-sub{font-size:12px}
+body .btn{padding:12px 15px;font-size:13.5px}
+body .btn-sm{padding:8px 11px;font-size:12px}
+body input,body select,body textarea{padding:12px 12px;font-size:14px}
+body .login-card{padding:18px;border-radius:22px}
+body .login-title{font-size:19px}
+body .mcard{padding:12px}
+body .mcard-title{font-size:13.5px}
+body .mcard-sub{font-size:11px}
+body .toast{font-size:13px;max-width:92vw}
+body .kw-box{max-width:94vw;padding:12px}
+body .stat-grid{gap:10px}
+body .stat-card{padding:12px}
+body .stat-value{font-size:16px}
+body .stat-label{font-size:10.5px}
+}
+/* ==== RESPONSIF: HP SANGAT KECIL ==== */
+@media(max-width:380px){
+body .wali-head{padding:14px 12px 18px}
+body .wh-name{font-size:14px}
+body .wh-sub{font-size:11px}
+body .wh-donut-wrap{width:78px;height:78px;min-width:78px}
+body .wh-donut-wrap .donut{width:78px;height:78px}
+body .donut-center b{font-size:13px}
+body .wb-row{font-size:11px}
+body .wb-row b{font-size:11.5px}
+body .spp-grid{grid-template-columns:repeat(3,1fr)}
+body .bill-name{font-size:12.5px}
+body .bill-icon{width:36px;height:36px;min-width:36px;font-size:16px}
+body .bn-item{font-size:8.5px}
+body .sec-title{font-size:14px}
+body .card{padding:12px}
+body .tl-name{font-size:12.5px}
+body .login-logoimg{width:104px;height:104px}
+body .splash-logo{width:88px;height:88px}
+body .stat-value{font-size:15px}
+body .btn{padding:11px 13px;font-size:13px}
+}
+/* ==== MODE GELAP MENYELURUH ==== */
 html[data-theme="gelap"]{--bg:#0b181b;--text:#e6f3f1;--muted:#9db8b4;--line:#1c3a39;--teal-soft:#0f2f2e;--orange-soft:#33241a;--success-bg:#0e2e21;--warning-bg:#33240f;--slate-bg:#1c2b2a;--shadow:0 10px 30px rgba(0,0,0,.4)}
 html[data-theme="gelap"] body{background-color:var(--bg);background-image:radial-gradient(rgba(18,176,190,.05) 1px,transparent 1px)}
 html[data-theme="gelap"] .card,html[data-theme="gelap"] .bill-card,html[data-theme="gelap"] .mcard,html[data-theme="gelap"] .tl-card,html[data-theme="gelap"] .prof-card,html[data-theme="gelap"] .ann-card,html[data-theme="gelap"] .kw-box{background:#0f2524;border-color:#1c3a39}
