@@ -64,4 +64,4 @@ var lastLen=null;
 function postRender(){injectThemeBtn();injectPwBtn();fixDemoBox();fixChips();injectTrend();injectAdminKw();injectRiwayatKw();maybeNotify();var n=state.pembayaran.length;if(lastLen===null){lastLen=n;}else if(n>lastLen&&state.session&&state.session.role==="admin"){var p=state.pembayaran[state.pembayaran.length-1];if(p)buatKwitansi(p);}lastLen=n;}
 if(typeof window.render==="function"&&!window.render.__ft){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postRender();}catch(e){}return r;};window.render.__ft=true;}
 setTimeout(postRender,300);
-})();
+})();   
