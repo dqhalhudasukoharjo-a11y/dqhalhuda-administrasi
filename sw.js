@@ -1,4 +1,4 @@
-const CACHE = "dqh-alhuda-v11";
+const CACHE = "dqh-alhuda-v12";
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(["./index.html", "./logo.png", "./manifest.webmanifest"])));
   self.skipWaiting();
