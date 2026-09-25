@@ -1,0 +1,41 @@
+/* ==== FITUR TAMBAHAN: tampilan, tema gelap, tren, kwitansi ==== */
+.wh-logo{width:40px;height:40px;min-width:40px;padding:4px}
+.wt-logo{width:32px;height:32px;min-width:32px;padding:3px}
+.sb-logo{width:34px;height:34px;min-width:34px;padding:4px}
+.ah-logo{width:32px;height:32px;min-width:32px;padding:4px}
+.splash-logo{width:96px;height:96px;padding:8px}
+.login-logoimg{width:120px;height:120px}
+.wali-container{max-width:620px}
+.bill-list{gap:10px}
+.bill-card{padding:12px}
+.wh-card{padding:12px}
+.wb-row{padding:6px 0}
+.spp-grid{gap:6px}
+.card{padding:16px}
+.mcard{padding:12px}
+.theme-btn{margin-left:auto;padding:8px 12px;border-radius:12px;background:var(--slate-bg);color:var(--slate);font-weight:800;font-size:12.5px}
+.wali-topbar .theme-btn{margin-left:6px}
+.trend-svg{width:100%;height:110px;background:var(--teal-soft);border-radius:12px}
+.trend-note{font-size:11.5px;color:var(--muted);margin-top:6px}
+.kw-mask{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:grid;place-items:center;padding:16px}
+.kw-box{background:#fff;border-radius:20px;max-width:430px;width:100%;padding:14px;max-height:92vh;overflow:auto}
+.kw-box img{width:100%;border-radius:12px;border:1px solid var(--line)}
+.kw-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+[data-theme="gelap"]{--bg:#0c1a1d;--text:#e3f2f0;--muted:#9cb6b3;--line:#1d3a3a;--teal-soft:#103031;--orange-soft:#332417;--success-bg:#0f2e22;--warning-bg:#33240f;--slate-bg:#1d2b2a;--shadow:0 10px 30px rgba(0,0,0,.35)}
+[data-theme="gelap"] body{background-color:var(--bg)}
+[data-theme="gelap"] .card,[data-theme="gelap"] .bill-card,[data-theme="gelap"] .mcard,[data-theme="gelap"] .tl-card,[data-theme="gelap"] .prof-card,[data-theme="gelap"] .ann-card,[data-theme="gelap"] .kw-box{background:#10262a;border-color:#1d3a3a}
+[data-theme="gelap"] .wali-topbar,[data-theme="gelap"] .bottom-nav,[data-theme="gelap"] .admin-tabs{background:#0c1a1d;border-color:#1d3a3a}
+[data-theme="gelap"] input,[data-theme="gelap"] select,[data-theme="gelap"] textarea{background:#0e2225;color:var(--text);border-color:#1d3a3a}
+[data-theme="gelap"] .btn-light{background:#1d3a3a;color:#cfe8e4}
+[data-theme="gelap"] .btn-danger{background:#2a1d1d;color:#e4cfcf}
+[data-theme="gelap"] .fc{background:#10262a;color:var(--muted);border-color:#1d3a3a}
+[data-theme="gelap"] .st-nol{background:#1d3a3a;color:var(--muted)}
+[data-theme="gelap"] .badge-kat{background:#103031;color:#9fd8d0}
+[data-theme="gelap"] .badge-lunas{background:#0f2e22;color:#7fd8a8}
+[data-theme="gelap"] .badge-sebagian{background:#33240f;color:#f0c070}
+[data-theme="gelap"] .badge-belum{background:#1d2b2a;color:#b0c4c2}
+[data-theme="gelap"] .theme-btn{background:#1d3a3a;color:#cfe8e4}
+[data-theme="gelap"] .trend-svg{background:#103031}
+[data-theme="gelap"] .demo-box,[data-theme="gelap"] .card-info{background:#332417;border-color:#7a5a30;color:#f0d0a0}
+[data-theme="gelap"] .link-btn{background:#1d2b2a;color:#9cb6b3}
+[data-theme="gelap"] tbody tr:hover{background:#0e2225}
