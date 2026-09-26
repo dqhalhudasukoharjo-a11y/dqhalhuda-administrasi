@@ -1,9 +1,36 @@
-/* ==== FITUR TAMBAHAN v5 DQH AL-HUDA ==== */
+/* ==== FITUR TAMBAHAN v6 DQH AL-HUDA ==== */
 (function(){
 "use strict";
 var st=document.createElement("style");
 st.textContent=".theme-btn-on-dark{background:rgba(255,255,255,.18)!important;color:#fff!important}.sidebar .theme-btn{width:100%;text-align:left;border-radius:13px;padding:12px 14px;font-size:14px;font-weight:700;background:rgba(255,255,255,.08);color:rgba(255,255,255,.85)}";
 document.head.appendChild(st);
+/* ---------- KEAMANAN: password admin tidak pernah ke server ---------- */
+var PW_HIDDEN="__HIDDEN__";
+var SYNC_CODE="DQH-SINKRON-2026-ALHUDA";
+function pwLocalGet(){return localStorage.getItem("dqh_admin_pw_local")||"";}
+function pwLocalSet(p){localStorage.setItem("dqh_admin_pw_local",p);window._adminPwLocal=p;}
+window._adminPwLocal=pwLocalGet();
+function stateHidePw(){if(window.state&&window.state.users)window.state.users.forEach(function(u){if(u.username==="admin"&&u.password!==PW_HIDDEN){if(!window._adminPwLocal)pwLocalSet(u.password);u.password=PW_HIDDEN;}});}
+stateHidePw();
+document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.dataset||f.dataset.form!=="login-admin")return;e.preventDefault();e.stopImmediatePropagation();var d=new FormData(f);var un=String(d.get("username")||"").trim();var pw=String(d.get("password")||"");var u=state.users.find(function(x){return x.username===un;});var ok=false;if(u){if(window._adminPwLocal){ok=(pw===window._adminPwLocal);}else if(u.password!==PW_HIDDEN){ok=(pw===u.password);if(ok)pwLocalSet(pw);}}if(!ok){showToast("Username/password salah","error");return;}stateHidePw();state.session={role:"admin"};state.page="dashboard";addLog("Admin login");saveState();render();},true);
+function openPwModal(loggedIn){closePw();var hasLocal=!!window._adminPwLocal;var mask=document.createElement("div");mask.className="kw-mask";mask.id="pwMask";var box=document.createElement("div");box.className="kw-box";box.style.maxWidth="380px";
+var html='<h3 style="margin-bottom:4px">🔑 '+(loggedIn&&hasLocal?"Ganti Password Admin":"Setel Password Admin")+'</h3>';
+if(loggedIn&&hasLocal){html+='<label>Password Lama</label><input type="password" id="pwOld"/>';}
+else{html+='<div style="font-size:12px;color:var(--muted);margin-bottom:8px">Perangkat ini belum menyimpan password admin. Masukkan Kode Sinkronisasi untuk membuktikan Anda admin.</div><label>Kode Sinkronisasi</label><input type="password" id="pwCode"/>';}
+html+='<label>Password Baru (min. 6 karakter)</label><input type="password" id="pwNew"/><label>Ulangi Password Baru</label><input type="password" id="pwNew2"/><div class="kw-actions"><button class="btn btn-primary btn-sm" id="pwSave">💾 Simpan</button><button class="btn btn-danger btn-sm" id="pwCancel">Batal</button></div>';
+box.innerHTML=html;mask.appendChild(box);document.body.appendChild(mask);
+mask.addEventListener("click",function(ev){if(ev.target===mask)closePw();});
+document.getElementById("pwCancel").onclick=closePw;
+document.getElementById("pwSave").onclick=function(){var n=document.getElementById("pwNew").value,n2=document.getElementById("pwNew2").value;
+if(!(loggedIn&&hasLocal)){var code=(document.getElementById("pwCode")||{}).value||"";if(code!==SYNC_CODE){showToast("Kode sinkronisasi salah","error");return;}}
+else{var o=document.getElementById("pwOld").value;if(o!==window._adminPwLocal){showToast("Password lama salah","error");return;}}
+if(n.length<6){showToast("Password baru minimal 6 karakter","error");return;}
+if(n!==n2){showToast("Konfirmasi tidak sama","error");return;}
+pwLocalSet(n);stateHidePw();saveState();if(window.SYNC)window.SYNC.push();closePw();showToast("Password admin tersimpan aman ✅ (hanya di perangkat ini)");};}
+function closePw(){var m=document.getElementById("pwMask");if(m)m.remove();}
+document.addEventListener("click",function(e){if(e.target.closest("[data-ft='pw']")){openPwModal(!!(state.session&&state.session.role==="admin"));}});
+function injectLoginPw(){if(state.session)return;var card=document.querySelector(".login-card");if(!card||card.querySelector("[data-ft='pwlogin']"))return;var b=document.createElement("button");b.type="button";b.className="link-btn";b.setAttribute("data-ft","pwlogin");b.textContent="🔑 Setel password admin di perangkat ini";b.onclick=function(){openPwModal(false);};card.appendChild(b);}
+function fixDemoBox(){var db=document.querySelector(".demo-box");if(db&&!db.dataset.ft){db.dataset.ft="1";db.innerHTML="<b>Login admin:</b> password tersimpan aman per perangkat (tidak dikirim ke server).<br/>Wali: NIS + PIN (6 digit terakhir NIS).";}}
 /* ---------- TEMA ---------- */
 function getTheme(){return localStorage.getItem("dqh_theme")||"terang";}
 function applyTheme(t){document.documentElement.setAttribute("data-theme",t);localStorage.setItem("dqh_theme",t);}
@@ -11,16 +38,6 @@ function themeLabel(){return (getTheme()==="gelap")?"☀️ Terang":"🌙 Gelap"
 function refreshThemeLabels(){document.querySelectorAll("[data-ft='theme']").forEach(function(b){b.textContent=themeLabel();});}
 document.addEventListener("click",function(e){var t=e.target.closest("[data-ft='theme']");if(!t)return;var n=(getTheme()==="gelap")?"terang":"gelap";applyTheme(n);refreshThemeLabels();});
 applyTheme(getTheme());
-/* ---------- PASSWORD ADMIN ---------- */
-function openPwModal(){closePw();var mask=document.createElement("div");mask.className="kw-mask";mask.id="pwMask";var box=document.createElement("div");box.className="kw-box";box.style.maxWidth="380px";
-box.innerHTML='<h3 style="margin-bottom:4px">🔑 Ganti Password Admin</h3><div style="font-size:12px;color:var(--muted);margin-bottom:8px">Berlaku untuk semua perangkat (tersinkron).</div><label>Password Lama</label><input type="password" id="pwOld"/><label>Password Baru (min. 6 karakter)</label><input type="password" id="pwNew"/><label>Ulangi Password Baru</label><input type="password" id="pwNew2"/><div class="kw-actions"><button class="btn btn-primary btn-sm" id="pwSave">💾 Simpan</button><button class="btn btn-danger btn-sm" id="pwCancel">Batal</button></div>';
-mask.appendChild(box);document.body.appendChild(mask);
-mask.addEventListener("click",function(ev){if(ev.target===mask)closePw();});
-document.getElementById("pwCancel").onclick=closePw;
-document.getElementById("pwSave").onclick=function(){var o=document.getElementById("pwOld").value,n=document.getElementById("pwNew").value,n2=document.getElementById("pwNew2").value;var u=state.users.find(function(x){return x.username==="admin";});if(!u){showToast("User admin tidak ditemukan","error");return;}if(u.password!==o){showToast("Password lama salah","error");return;}if(n.length<6){showToast("Password baru minimal 6 karakter","error");return;}if(n!==n2){showToast("Konfirmasi password tidak sama","error");return;}u.password=n;saveState();closePw();showToast("Password admin diganti ✅");};}
-function closePw(){var m=document.getElementById("pwMask");if(m)m.remove();}
-document.addEventListener("click",function(e){if(e.target.closest("[data-ft='pw']"))openPwModal();});
-function fixDemoBox(){var u=state.users.find(function(x){return x.username==="admin";});if(!u||u.password==="admin123")return;var db=document.querySelector(".demo-box");if(db&&!db.dataset.ft){db.dataset.ft="1";db.innerHTML="<b>Login admin:</b> pakai password yang sudah Anda ganti.<br/>Wali: NIS + PIN (6 digit terakhir NIS).";}}
 /* ---------- TOMBOL ---------- */
 function mkBtn(ft,cls,label){var b=document.createElement("button");b.type="button";b.className=cls;b.setAttribute("data-ft",ft);b.textContent=label;return b;}
 function place(host,btn,ref){if(!host)return;if(host.querySelector("[data-ft='"+btn.getAttribute("data-ft")+"']"))return;if(ref&&host.contains(ref))host.insertBefore(btn,ref);else host.appendChild(btn);}
@@ -42,16 +59,15 @@ function injectControls(){
     place(wht,mkBtn("theme","theme-btn theme-btn-on-dark",themeLabel()),wht?wht.querySelector(".wh-logout"):null);
   }
 }
-/* ---------- TAGIH BULAN DEPAN (SEMUA SANTRI) ---------- */
+/* ---------- TAGIH BULAN DEPAN ---------- */
 function injectBulkFill(){if(!(state.session&&state.session.role==="admin"))return;if(!document.querySelector("form[data-form='gen-ta']"))return;var ph=document.querySelector(".admin-content .page-head");if(!ph||ph.querySelector("[data-ft='bulkfill']"))return;var b=document.createElement("button");b.className="btn btn-primary btn-sm";b.setAttribute("data-ft","bulkfill");b.textContent="⚡ Tagihkan Bulan Depan (Semua Santri)";b.onclick=bulkFill;ph.appendChild(b);}
 function bulkFill(){var cut=sppNowIndex();var n=0;state.santri.forEach(function(s){var ta=latestTA(s.id);var sp=getSpp(s.id,ta);if(!sp)return;var rate=sp.tarif||0;if(!rate)return;MONTHS.forEach(function(m,i){if(i<=cut)return;var c=sp.months[m]||{t:0,b:0};if(!c.t){c.t=rate;sp.months[m]=c;n++;}});});saveState();render();showToast(n+" bulan depan ditagihkan untuk semua santri ✅");}
-/* ---------- PERBAIKAN: TERAPKAN KE SEMUA BULAN ---------- */
 document.addEventListener("submit",function(e){var f=e.target;if(f&&f.dataset&&f.dataset.form==="set-spp"){setTimeout(function(){var sid=state.tarifSantri;if(!sid)return;var sp=getSpp(sid,latestTA(sid));if(!sp)return;var rate=sp.tarif||0;MONTHS.forEach(function(m){var c=sp.months[m]||{t:0,b:0};if(!c.t&&rate)c.t=rate;sp.months[m]=c;});saveState();render();},0);}});
-/* ---------- TOTAL & TUNGGAKAN HANYA BULAN JATUH TEMPO ---------- */
+/* ---------- TOTAL & TUNGGAKAN HANYA JATUH TEMPO ---------- */
 window.taSum=function(sid,ta){var t=0,b=0,cut=sppNowIndex();var sp=getSpp(sid,ta);if(sp)MONTHS.forEach(function(m,i){var c=sp.months[m]||{t:0,b:0};if(i<=cut||c.b>0){t+=c.t;b+=Math.min(c.b,c.t);}});state.items.forEach(function(x){if(x.santriId===sid&&x.ta===ta){t+=x.tarif;b+=Math.min(x.terbayar,x.tarif);}});return{total:t,dibayar:b,sisa:t-b};};
 window.allSum=function(sid){var t=0,b=0,cut=sppNowIndex();state.spp.forEach(function(sp){if(!sid||sp.santriId===sid)MONTHS.forEach(function(m,i){var c=sp.months[m]||{t:0,b:0};if(i<=cut||c.b>0){t+=c.t;b+=Math.min(c.b,c.t);}});});state.items.forEach(function(x){if(!sid||x.santriId===sid){t+=x.tarif;b+=Math.min(x.terbayar,x.tarif);}});return{total:t,dibayar:b,sisa:t-b};};
 window.sisaList=function(sid,ta){var out=[],cut=sppNowIndex();var sp=getSpp(sid,ta);if(sp)MONTHS.forEach(function(m,i){var c=sp.months[m];if(c&&c.t>c.b&&i<=cut)out.push({key:"SPP:"+m,label:"SPP "+MONTH_ID[m]+" "+ta,sisa:c.t-c.b,st:mStatus(c)});});state.items.forEach(function(x){if(x.santriId===sid&&x.ta===ta&&x.tarif>x.terbayar)out.push({key:"ITEM:"+x.id,label:x.nama,sisa:x.tarif-x.terbayar,st:x.terbayar>0?"seb":"belum"});});return out;};
-/* ---------- CHIP AKURAT (hanya jatuh tempo) ---------- */
+/* ---------- CHIP AKURAT ---------- */
 function fixChips(){if(!(state.session&&state.session.role==="wali"))return;var wrap=document.querySelector(".wb-chips");if(!wrap)return;var s=state.santri.find(function(x){return x.id===state.session.santriId;});if(!s)return;var tas=taListOf(s.id);var ta=state.waliTA||(tas.indexOf(currentTA())>=0?currentTA():latestTA(s.id));var cut=sppNowIndex();var L=0,S=0,B=0;var sp=getSpp(s.id,ta);if(sp)MONTHS.forEach(function(m,i){var c=sp.months[m];if(!c||!c.t)return;if(i>cut&&c.b===0)return;var st2=mStatus(c);if(st2==="lunas")L++;else if(st2==="seb")S++;else B++;});state.items.forEach(function(i){if(i.santriId===s.id&&i.ta===ta&&i.tarif>0){if(i.terbayar>=i.tarif)L++;else if(i.terbayar>0)S++;else B++;}});wrap.innerHTML='<span class="wb-chip">🟢 Lunas '+L+'</span><span class="wb-chip">🟠 Sebagian '+S+'</span><span class="wb-chip">⚪ Belum '+B+'</span>';}
 /* ---------- TREN ---------- */
 function monthKeys(){var o=[],d=new Date();for(var i=11;i>=0;i--){var x=new Date(d.getFullYear(),d.getMonth()-i,1);o.push(x.toISOString().slice(0,7));}return o;}
@@ -94,9 +110,8 @@ function injectRiwayatKw(){if(!(state.session&&state.session.role==="wali"))retu
 function injectAdminKw(){if(!(state.session&&state.session.role==="admin"))return;if(!document.getElementById("tableBayar"))return;var ph=document.querySelector(".admin-content .page-head");if(!ph||ph.querySelector("[data-ft='kwlast']"))return;var b=document.createElement("button");b.className="btn btn-light btn-sm";b.setAttribute("data-ft","kwlast");b.textContent="🧾 Kwitansi Terakhir";b.onclick=function(){var p=state.pembayaran[state.pembayaran.length-1];if(p)buatKwitansi(p);else showToast("Belum ada pembayaran");};var qa=ph.querySelector(".qa-row");if(qa)qa.appendChild(b);else ph.appendChild(b);}
 /* ---------- MESIN ---------- */
 var lastLen=null;
-function postRender(){injectControls();injectBulkFill();fixDemoBox();fixChips();injectTrend();injectAdminKw();injectRiwayatKw();maybeNotify();var n=state.pembayaran.length;if(lastLen===null){lastLen=n;}else if(n>lastLen&&state.session&&state.session.role==="admin"){var p=state.pembayaran[state.pembayaran.length-1];if(p)buatKwitansi(p);}lastLen=n;}
+function postRender(){injectControls();injectBulkFill();injectLoginPw();fixDemoBox();fixChips();injectTrend();injectAdminKw();injectRiwayatKw();maybeNotify();var n=state.pembayaran.length;if(lastLen===null){lastLen=n;}else if(n>lastLen&&state.session&&state.session.role==="admin"){var p=state.pembayaran[state.pembayaran.length-1];if(p)buatKwitansi(p);}lastLen=n;}
 if(typeof window.render==="function"&&!window.render.__ft){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postRender();}catch(e){}return r;};window.render.__ft=true;}
 setTimeout(postRender,300);
 setTimeout(function(){try{render();}catch(e){}},80);
 })();
-
