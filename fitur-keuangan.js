@@ -33,7 +33,7 @@ function buildHTML(){
    '<div class="card fin-card"><h3>📅 Pemasukan per Bulan</h3>'+
    '<div class="fin-subtitle">Rincian total uang masuk & jumlah transaksi per bulan kalender, diurutkan dari bulan paling lama.</div>'+
    '<div class="fin-scroll"><table class="fin-table"><thead><tr><th>Bulan</th><th class="num">Total Masuk</th><th class="num">Jumlah Trx</th><th>Proporsi</th></tr></thead><tbody>'+rowsM+'<tr class="fin-total"><td>TOTAL SEMUA BULAN</td><td class="num">'+rupiah(grand)+'</td><td class="num">'+state.pembayaran.length+' trx</td><td></td></tr></tbody></table></div>'+
-   '<div class="fin-footnote">Proporsi = total bulan itu dibanding bulan dengan pemasukan tertinggi. Angka ini sama dengan total "SUDAH DIBAYAR" di kartu statistik.</div></div>'+
+   '<div class="fin-footnote">Proporsi = total bulan itu dibanding bulan dengan pemasukan tertinggi. Tabel ini menghitung transaksi sejak 1 Juni 2026 (sesuai export Braja) + input manual; pembayaran sebelum itu sudah masuk di kartu "Sudah Dibayar".</div></div>'+
    '<div class="card fin-card"><h3>🎓 Pemasukan per Tahun Ajaran</h3>'+
    '<div class="fin-subtitle">Akumulasi pemasukan sejak tahun ajaran dimulai sampai hari ini. Berguna untuk melihat capaian tiap angkatan.</div>'+
    '<div class="fin-scroll"><table class="fin-table"><thead><tr><th>Tahun Ajaran</th><th class="num">Sudah Masuk</th><th class="num">Kewajiban</th><th class="num">Tercapai</th></tr></thead><tbody>'+rowsTA+'<tr class="fin-total"><td>TOTAL SEMUA TA</td><td class="num">'+rupiah(grandTA)+'</td><td class="num">'+rupiah(grandObl)+'</td><td class="num"><span class="fin-chip">'+pctTA+'%</span></td></tr></tbody></table></div>'+
