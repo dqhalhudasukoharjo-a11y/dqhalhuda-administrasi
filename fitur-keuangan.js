@@ -1,4 +1,4 @@
-/* ==== FITUR KEUANGAN v3 DQH AL-HUDA ==== */
+/* ==== FITUR KEUANGAN v4 DQH AL-HUDA ==== */
 (function(){
 "use strict";
 var st=document.createElement("style");
@@ -50,13 +50,13 @@ function injectFinance(){
   var wrap=document.createElement("div");wrap.id="finCard";wrap.innerHTML=buildHTML();
   grids[0].parentNode.insertBefore(wrap,grids[0].nextSibling);
 }
-/* ---- BARU: label TA pada semua tagihan nonbulanan (sekali jalan, otomatis sinkron) ---- */
+/* ---- Label TA pada tagihan nonbulanan ---- */
 function nameItemsWithTA(){
   if(window._taNamed)return;window._taNamed=1;var ch=0;
   state.items.forEach(function(it){if(it.nama&&String(it.nama).indexOf(" TP ")===-1){it.nama=it.nama+" TP "+it.ta;ch=1;}});
   if(ch){saveState();}
 }
-/* ---- BARU: form tambah tagihan nonbulanan manual ---- */
+/* ---- Form tambah tagihan nonbulanan ---- */
 var KATS=["Pengembangan","Seragam","Pendaftaran","Kesehatan","FC Ujian","Extrakurikuler","Buku","Akhirussanah","Kegiatan Niha'i","Lainnya"];
 function injectAddItem(){
   if(!(state.session&&state.session.role==="admin"))return;
@@ -86,8 +86,53 @@ function injectAddItem(){
     saveState();render();showToast("Tagihan "+kat+" TP "+ta+" ditambahkan ✅");
   };
 }
+/* ---- BARU v4: dropdown pembayaran menampilkan SEMUA TA ---- */
+window.buildTargets=function(sid){
+  var tSel=document.getElementById("bayarTarget");var nIn=document.getElementById("bayarNominal");if(!tSel||!nIn)return;
+  if(!sid){tSel.innerHTML='<option value="">Pilih santri dulu</option>';nIn.value="";return;}
+  var tas=taListOf(sid).slice().reverse();
+  var latest=latestTA(sid);var opts=[];
+  tas.forEach(function(ta){
+    var sp=getSpp(sid,ta);
+    if(sp)MONTHS.forEach(function(m){var c=sp.months[m];if(c&&c.t>c.b){
+      var v=(ta===latest)?("SPP:"+m):("SPPX:"+m+"|"+ta);
+      opts.push({v:v,label:"SPP "+MONTH_ID[m]+" "+ta+" — sisa "+rupiah(c.t-c.b),sisa:c.t-c.b});
+    }});
+    state.items.forEach(function(i){if(i.santriId===sid&&i.ta===ta&&i.tarif>i.terbayar){
+      opts.push({v:"ITEM:"+i.id,label:i.nama+" — sisa "+rupiah(i.tarif-i.terbayar),sisa:i.tarif-i.terbayar});
+    }});
+  });
+  if(!opts.length){tSel.innerHTML='<option value="">Semua kewajiban lunas</option>';nIn.value="";return;}
+  tSel.innerHTML=opts.map(function(o){return '<option value="'+o.v+'" data-sisa="'+o.sisa+'">'+esc(o.label)+'</option>';}).join("");
+  nIn.value=opts[0].sisa;
+};
+/* ---- BARU v4: proses pembayaran SPP TA lama (selain TA terbaru) ---- */
+document.addEventListener("submit",function(e){
+  var f=e.target;if(!f||!f.dataset||f.dataset.form!=="add-bayar")return;
+  var tSel=document.getElementById("bayarTarget");var tv=tSel?tSel.value:"";
+  if(tv.indexOf("SPPX:")!==0)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  var sid=document.getElementById("bayarSantri").value;
+  var parts=tv.slice(5).split("|");var m=parts[0];var ta=parts[1];
+  var nominal=Number(document.getElementById("bayarNominal").value);
+  var metode=document.getElementById("bayarMetode").value;
+  var tanggal=document.getElementById("bayarTanggal").value;
+  var sp=getSpp(sid,ta);var c=sp&&sp.months[m];
+  if(!c){showToast("Bulan tidak ditemukan","error");return;}
+  var sisa=c.t-c.b;
+  if(!nominal||nominal<=0){showToast("Nominal tidak valid","error");return;}
+  if(nominal>sisa){showToast("Maksimal sisa "+rupiah(sisa),"error");return;}
+  c.b+=nominal;
+  var nama="SPP "+MONTH_ID[m]+" "+ta;
+  state.pembayaran.push({id:uid(),santriId:sid,ta:ta,tipe:"SPP",bulan:m,nama:nama,nominal:nominal,metode:metode,tanggal:tanggal,no:noTrx()});
+  addLog("Pembayaran "+nama+" "+rupiah(nominal));
+  saveState();render();showToast("Pembayaran tercatat ✅");
+},true);
 /* ---- MESIN ---- */
-function postFin(){injectFinance();nameItemsWithTA();injectAddItem();}
+function postFin(){
+  injectFinance();nameItemsWithTA();injectAddItem();
+  if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();}catch(e){}},60);}
+}
 if(typeof window.render==="function"&&!window.render.__fin){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postFin();}catch(e){}return r;};window.render.__fin=true;}
 setTimeout(postFin,350);
 })();
