@@ -135,4 +135,7 @@ function postFin(){
 }
 if(typeof window.render==="function"&&!window.render.__fin){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postFin();}catch(e){}return r;};window.render.__fin=true;}
 setTimeout(postFin,350);
+/* ---- v5: daftar tunggakan & pesan WA mencakup semua TA ---- */
+window.tunggakanList=function(){return state.santri.map(function(s){var ta=latestTA(s.id);var list=[];taListOf(s.id).slice().reverse().forEach(function(t){list=list.concat(sisaList(s.id,t));});return{s:s,ta:ta,sum:allSum(s.id),list:list};}).filter(function(v){return v.sum.sisa>0;}).sort(function(a,b){return b.sum.sisa-a.sum.sisa;});};
+window.waMessage=function(v){var lines=[];taListOf(v.s.id).slice().reverse().forEach(function(ta){sisaList(v.s.id,ta).forEach(function(x){lines.push("• "+x.label+": "+rupiah(x.sisa));});});if(!lines.length)lines.push("• (tidak ada tunggakan)");return "Assalamu'alaikum warahmatullahi wabarakatuh\nYth. Bapak/Ibu "+v.s.waliNama+", wali dari ananda *"+v.s.nama+"* (Kelas "+v.s.kelas+").\n\nBerikut keterangan administrasi (seluruh tahun ajaran) yang belum tertunaikan:\n"+lines.join("\n")+"\n\n*Total sisa: "+rupiah(v.sum.sisa)+"*\n\nKami ingatkan bahwa batas maksimal pembayaran SPP adalah *tanggal 10 setiap bulan*. Apabila Bapak/Ibu belum mampu membayar tepat waktu, mohon berkenan *konfirmasi/izin kepada Mudir* pondok terlebih dahulu.\n\nTerima kasih atas perhatian dan kerja samanya. Jazakumullah khairan katsiran.\n— Administrasi DQH AL-HUDA Sukoharjo";};
 })();
