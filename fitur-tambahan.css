@@ -164,3 +164,12 @@ body .grid-eq>.card>.vchart{flex:1;height:auto;min-height:220px}
 body .grid-eq>.card>.table-wrap{flex:1}
 body .fin-grid{align-items:stretch}
 body .fin-grid>.card{margin-bottom:0}
+
+/* ==== v5: perbaiki grid wali layar lebar & tombol tema dobel ==== */
+body .wali-grid>*{min-width:0}
+body .wg-main{min-width:0}
+body .wg-side{min-width:0}
+body .bill-list>*{min-width:0}
+body .bill-card{min-width:0}
+@media(min-width:640px){body .wh-top [data-ft="theme"]{display:none}}
+
