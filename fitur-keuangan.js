@@ -1,4 +1,4 @@
-/* ==== FITUR KEUANGAN v2 DQH AL-HUDA ==== */
+/* ==== FITUR KEUANGAN v3 DQH AL-HUDA ==== */
 (function(){
 "use strict";
 var st=document.createElement("style");
@@ -50,6 +50,44 @@ function injectFinance(){
   var wrap=document.createElement("div");wrap.id="finCard";wrap.innerHTML=buildHTML();
   grids[0].parentNode.insertBefore(wrap,grids[0].nextSibling);
 }
-if(typeof window.render==="function"&&!window.render.__fin){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{injectFinance();}catch(e){}return r;};window.render.__fin=true;}
-setTimeout(injectFinance,350);
+/* ---- BARU: label TA pada semua tagihan nonbulanan (sekali jalan, otomatis sinkron) ---- */
+function nameItemsWithTA(){
+  if(window._taNamed)return;window._taNamed=1;var ch=0;
+  state.items.forEach(function(it){if(it.nama&&String(it.nama).indexOf(" TP ")===-1){it.nama=it.nama+" TP "+it.ta;ch=1;}});
+  if(ch){saveState();}
+}
+/* ---- BARU: form tambah tagihan nonbulanan manual ---- */
+var KATS=["Pengembangan","Seragam","Pendaftaran","Kesehatan","FC Ujian","Extrakurikuler","Buku","Akhirussanah","Kegiatan Niha'i","Lainnya"];
+function injectAddItem(){
+  if(!(state.session&&state.session.role==="admin"))return;
+  if(!document.getElementById("tarifSantriSel"))return;
+  if(document.getElementById("addItemCard"))return;
+  var host=document.querySelector(".admin-content .grid-2");if(!host)return;
+  var card=document.createElement("div");card.className="card";card.id="addItemCard";
+  card.innerHTML='<h3>➕ Tambah Tagihan Nonbulanan</h3><div class="fin-subtitle">Untuk menambahkan tagihan yang belum tercatat (mis. Ekstrakurikuler TA lama). Isi angka persis seperti di Braja.</div>'+
+  '<label>Kategori</label><select id="aiKat">'+KATS.map(function(k){return '<option>'+k+'</option>';}).join("")+'</select>'+
+  '<label>Tahun Ajaran</label><input id="aiTa" value="2025/2026"/>'+
+  '<label>Tarif</label><input id="aiTarif" type="number" value="0"/>'+
+  '<label>Sudah terbayar</label><input id="aiBayar" type="number" value="0"/>'+
+  '<button class="btn btn-primary btn-block mt" id="aiSave">➕ Tambah Tagihan</button>';
+  host.appendChild(card);
+  document.getElementById("aiSave").onclick=function(){
+    var sid=state.tarifSantri;if(!sid){showToast("Pilih santri dulu","error");return;}
+    var kat=document.getElementById("aiKat").value;
+    var ta=String(document.getElementById("aiTa").value).trim();
+    var t=Number(document.getElementById("aiTarif").value)||0;
+    var b=Number(document.getElementById("aiBayar").value)||0;
+    if(!/^\d{4}\/\d{4}$/.test(ta)){showToast("Format TA salah (contoh 2025/2026)","error");return;}
+    if(t<=0){showToast("Tarif harus lebih dari 0","error");return;}
+    if(b>t)b=t;
+    var ex=state.items.find(function(x){return x.santriId===sid&&x.ta===ta&&x.kategori===kat;});
+    if(ex){showToast("Tagihan "+kat+" "+ta+" sudah ada untuk santri ini","error");return;}
+    state.items.push({id:uid(),santriId:sid,ta:ta,nama:kat+" TP "+ta,kategori:kat,tarif:t,terbayar:b});
+    saveState();render();showToast("Tagihan "+kat+" TP "+ta+" ditambahkan ✅");
+  };
+}
+/* ---- MESIN ---- */
+function postFin(){injectFinance();nameItemsWithTA();injectAddItem();}
+if(typeof window.render==="function"&&!window.render.__fin){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postFin();}catch(e){}return r;};window.render.__fin=true;}
+setTimeout(postFin,350);
 })();
