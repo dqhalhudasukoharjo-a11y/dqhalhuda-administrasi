@@ -321,9 +321,44 @@ function showKwGabungan(canvas,pays,s,total){
   box.appendChild(im);box.appendChild(act);mask.appendChild(box);document.body.appendChild(mask);
 }
 function closeKw(){var m=document.getElementById("kwMask");if(m)m.remove();}
+/* ---------- BARU v8: BATALKAN TRANSAKSI ---------- */
+function injectCancelBtns(){
+  if(!(state.session&&state.session.role==="admin"))return;
+  var tb=document.getElementById("tableBayar");if(!tb)return;
+  var thead=tb.querySelector("thead tr");
+  if(thead&&thead.children.length===6&&!thead.querySelector("th[data-act-col]")){var th=document.createElement("th");th.setAttribute("data-act-col","1");th.textContent="Aksi";thead.appendChild(th);}
+  tb.querySelectorAll("tbody tr").forEach(function(tr){
+    if(tr.querySelector("[data-ft='cancel']"))return;
+    var no=tr.children[1]?String(tr.children[1].textContent).trim():"";
+    if(!no)return;
+    var td=document.createElement("td");
+    var b=document.createElement("button");b.type="button";b.className="btn btn-danger btn-sm";b.setAttribute("data-ft","cancel");b.setAttribute("data-no",no);b.textContent="🗑";b.title="Batalkan transaksi "+no;
+    td.appendChild(b);tr.appendChild(td);
+  });
+  document.querySelectorAll(".admin-content .mcard").forEach(function(mc){
+    if(mc.querySelector("[data-ft='cancel']"))return;
+    var m=String(mc.textContent).match(/SIS\d{10,}/);if(!m)return;
+    var b=document.createElement("button");b.type="button";b.className="btn btn-danger btn-sm mt";b.setAttribute("data-ft","cancel");b.setAttribute("data-no",m[0]);b.textContent="🗑 Batalkan";
+    mc.appendChild(b);
+  });
+  var sc=document.getElementById("cariBayar");
+  if(sc&&!sc.__cx){sc.__cx=1;sc.addEventListener("input",function(){setTimeout(injectCancelBtns,0);});}
+}
+function cancelTrx(no){
+  var p=state.pembayaran.find(function(x){return x.no===no;});
+  if(!p){showToast("Transaksi tidak ditemukan","error");return;}
+  var s=state.santri.find(function(x){return x.id===p.santriId;})||{};
+  if(!window.confirm("Batalkan transaksi "+p.no+"?\n"+(s.nama||"-")+" — "+p.nama+"\nNominal "+rupiah(p.nominal)+" • "+p.tanggal+"\n\nSisa tagihan akan dikembalikan dan perubahan tersinkron ke semua perangkat."))return;
+  if(p.tipe==="SPP"){var sp=getSpp(p.santriId,p.ta);var c=sp&&sp.months[p.bulan];if(c)c.b=Math.max(0,c.b-p.nominal);}
+  else if(p.tipe==="ITEM"){var it=state.items.find(function(x){return x.id===p.refId;});if(it)it.terbayar=Math.max(0,it.terbayar-p.nominal);}
+  state.pembayaran=state.pembayaran.filter(function(x){return x.id!==p.id;});
+  addLog("Pembayaran DIBATALKAN "+p.no+" "+rupiah(p.nominal)+" ("+(s.nama||"-")+")");
+  saveState();render();showToast("Transaksi "+p.no+" dibatalkan & sisa dikembalikan ✅");
+}
+document.addEventListener("click",function(e){var t=e.target.closest("[data-ft='cancel']");if(t)cancelTrx(t.getAttribute("data-no"));});
 /* ---------- MESIN ---------- */
 function postFin(){
-  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();
+  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();
   if(window._bulkPays){var ps=window._bulkPays;window._bulkPays=null;openKwitansiGabungan(ps);}
   if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();curifyPage();}catch(e){}},60);}
 }
