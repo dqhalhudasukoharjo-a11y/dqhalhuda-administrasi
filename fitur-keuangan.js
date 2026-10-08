@@ -1,9 +1,21 @@
-/* ==== FITUR KEUANGAN v6 DQH AL-HUDA ==== */
+/* ==== FITUR KEUANGAN v7 DQH AL-HUDA ==== */
 (function(){
 "use strict";
 var st=document.createElement("style");
-st.textContent=".fin-grid{display:grid;gap:16px;grid-template-columns:1fr;margin-bottom:16px;align-items:stretch}@media(min-width:1000px){.fin-grid{grid-template-columns:1.2fr .8fr}}.fin-card{display:flex;flex-direction:column;height:100%}.fin-card .fin-scroll{flex:1;min-height:300px}.fin-subtitle{font-size:11.5px;color:var(--muted);margin-top:-6px;margin-bottom:10px;line-height:1.5}.fin-table{width:100%;border-collapse:collapse;min-width:0}.fin-table th,.fin-table td{padding:9px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:left;vertical-align:middle}.fin-table th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}.fin-table td.num,.fin-table th.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.fin-table tr.fin-total td{border-top:2px solid var(--teal-dark);border-bottom:none;font-weight:800;background:var(--teal-soft)}html[data-theme=\"gelap\"] .fin-table tr.fin-total td{background:#0f2f2e}.fin-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;min-width:60px}.fin-bar i{display:block;height:100%;background:var(--grad-orange);border-radius:99px}.fin-chip{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10.5px;font-weight:800;background:var(--teal-soft);color:var(--teal-dark)}html[data-theme=\"gelap\"] .fin-chip{background:#0f2f2e;color:#9fd8d0}.fin-scroll{max-height:420px;overflow-y:auto;border-radius:8px}.fin-footnote{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.55;border-top:1px dashed var(--line);padding-top:8px}html[data-theme=\"gelap\"] .fin-footnote{border-color:#1c3a39}.bk-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}.bk-row input[type=checkbox]{width:auto;min-width:18px}.bk-row .bk-l{flex:1;font-size:12.5px;font-weight:700}.bk-row .bk-s{font-size:11px;color:var(--muted);font-weight:600}.bk-row input[type=number]{width:112px;padding:8px}";
+st.textContent=".fin-grid{display:grid;gap:16px;grid-template-columns:1fr;margin-bottom:16px;align-items:stretch}@media(min-width:1000px){.fin-grid{grid-template-columns:1.2fr .8fr}}.fin-card{display:flex;flex-direction:column;height:100%}.fin-card .fin-scroll{flex:1;min-height:300px}.fin-subtitle{font-size:11.5px;color:var(--muted);margin-top:-6px;margin-bottom:10px;line-height:1.5}.fin-table{width:100%;border-collapse:collapse;min-width:0}.fin-table th,.fin-table td{padding:9px 8px;border-bottom:1px solid var(--line);font-size:12.5px;text-align:left;vertical-align:middle}.fin-table th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.4px}.fin-table td.num,.fin-table th.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}.fin-table tr.fin-total td{border-top:2px solid var(--teal-dark);border-bottom:none;font-weight:800;background:var(--teal-soft)}html[data-theme=\"gelap\"] .fin-table tr.fin-total td{background:#0f2f2e}.fin-bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden;min-width:60px}.fin-bar i{display:block;height:100%;background:var(--grad-orange);border-radius:99px}.fin-chip{display:inline-block;padding:3px 8px;border-radius:999px;font-size:10.5px;font-weight:800;background:var(--teal-soft);color:var(--teal-dark)}html[data-theme=\"gelap\"] .fin-chip{background:#0f2f2e;color:#9fd8d0}.fin-scroll{max-height:420px;overflow-y:auto;border-radius:8px}.fin-footnote{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.55;border-top:1px dashed var(--line);padding-top:8px}html[data-theme=\"gelap\"] .fin-footnote{border-color:#1c3a39}.bk-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}.bk-row input[type=checkbox]{width:auto;min-width:18px}.bk-row .bk-l{flex:1;font-size:12.5px;font-weight:700}.bk-row .bk-s{font-size:11px;color:var(--muted);font-weight:600}.bk-row input[data-bkn]{width:120px;padding:8px;text-align:right}";
 document.head.appendChild(st);
+/* ---------- FORMAT CURRENCY ---------- */
+function rawNum(v){return String(v==null?"":v).replace(/[^\d]/g,"");}
+function fmtCur(v){var n=rawNum(v);if(n==="")return "";return Number(n).toLocaleString("id-ID");}
+function curify(inp){if(!inp)return;inp.setAttribute("type","text");inp.setAttribute("inputmode","numeric");if(!inp.dataset.cur){inp.dataset.cur="1";inp.addEventListener("input",function(){inp.value=fmtCur(inp.value);});}if(document.activeElement!==inp)inp.value=fmtCur(inp.value);}
+function curifyPage(){
+  document.querySelectorAll(".admin-content input[type=number]").forEach(curify);
+  document.querySelectorAll(".admin-content input[data-cur]").forEach(function(i){if(document.activeElement!==i)i.value=fmtCur(i.value);});
+  var bt=document.getElementById("bayarTarget");
+  if(bt&&!bt.__cur){bt.__cur=1;bt.addEventListener("change",function(){var nn=document.getElementById("bayarNominal");if(nn)setTimeout(function(){curify(nn);},0);});}
+}
+document.addEventListener("submit",function(e){var f=e.target;if(!f||!f.querySelectorAll)return;f.querySelectorAll("input[data-cur]").forEach(function(i){i.value=rawNum(i.value);});},true);
+/* ---------- DASHBOARD KEUANGAN ---------- */
 function monthName(k){var p=k.split("-");var n=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];return n[+p[1]-1]+" "+p[0];}
 function compute(){
   var perMonth={},perTA={},taObl={},cut=sppNowIndex();
@@ -55,6 +67,7 @@ function nameItemsWithTA(){
   state.items.forEach(function(it){if(it.nama&&String(it.nama).indexOf(" TP ")===-1){it.nama=it.nama+" TP "+it.ta;ch=1;}});
   if(ch){saveState();}
 }
+/* ---------- TAMBAH TAGIHAN NONBULANAN ---------- */
 var KATS=["Pengembangan","Seragam","Pendaftaran","Kesehatan","FC Ujian","Extrakurikuler","Buku","Akhirussanah","Kegiatan Niha'i","Lainnya"];
 function injectAddItem(){
   if(!(state.session&&state.session.role==="admin"))return;
@@ -73,8 +86,8 @@ function injectAddItem(){
     var sid=state.tarifSantri;if(!sid){showToast("Pilih santri dulu","error");return;}
     var kat=document.getElementById("aiKat").value;
     var ta=String(document.getElementById("aiTa").value).trim();
-    var t=Number(document.getElementById("aiTarif").value)||0;
-    var b=Number(document.getElementById("aiBayar").value)||0;
+    var t=Number(rawNum(document.getElementById("aiTarif").value))||0;
+    var b=Number(rawNum(document.getElementById("aiBayar").value))||0;
     if(!/^\d{4}\/\d{4}$/.test(ta)){showToast("Format TA salah (contoh 2025/2026)","error");return;}
     if(t<=0){showToast("Tarif harus lebih dari 0","error");return;}
     if(b>t)b=t;
@@ -84,6 +97,32 @@ function injectAddItem(){
     saveState();render();showToast("Tagihan "+kat+" TP "+ta+" ditambahkan ✅");
   };
 }
+/* ---------- BARU v7: BUAT CATATAN SPP 12 BULAN ---------- */
+function injectCreateSpp(){
+  if(!(state.session&&state.session.role==="admin"))return;
+  if(!document.getElementById("tarifSantriSel"))return;
+  var host=document.querySelector(".admin-content .grid-2");if(!host)return;
+  var old=document.getElementById("createSppCard");if(old)old.remove();
+  var sid=state.tarifSantri;if(!sid)return;
+  if(getSpp(sid,latestTA(sid)))return;
+  var card=document.createElement("div");card.className="card";card.id="createSppCard";
+  card.innerHTML='<h3>📅 Buat Catatan SPP 12 Bulan</h3><div class="fin-subtitle">Santri ini belum punya catatan SPP untuk TA berjalan. Buat dulu supaya bulan JUL–JUN tertagih dan bisa dibayar.</div>'+
+  '<label>Tahun Ajaran</label><input id="csTa" value="'+latestTA(sid)+'"/>'+
+  '<label>Tarif SPP per bulan</label><input id="csTarif" type="number" value="0"/>'+
+  '<button class="btn btn-primary btn-block mt" id="csSave">📅 Buat & Tagihkan 12 Bulan</button>';
+  host.insertBefore(card,host.firstChild);
+  document.getElementById("csSave").onclick=function(){
+    var ta=String(document.getElementById("csTa").value).trim();
+    var t=Number(rawNum(document.getElementById("csTarif").value))||0;
+    if(!/^\d{4}\/\d{4}$/.test(ta)){showToast("Format TA salah (contoh 2026/2027)","error");return;}
+    if(t<=0){showToast("Tarif harus lebih dari 0","error");return;}
+    if(getSpp(sid,ta)){showToast("Catatan SPP TA "+ta+" sudah ada","error");return;}
+    var months={};MONTHS.forEach(function(m){months[m]={t:t,b:0};});
+    state.spp.push({id:uid(),santriId:sid,ta:ta,tarif:t,months:months});
+    saveState();render();showToast("Catatan SPP 12 bulan dibuat ✅ Santri siap dibayarkan");
+  };
+}
+/* ---------- DROPDOWN PEMBAYARAN LINTAS TA ---------- */
 window.buildTargets=function(sid){
   var tSel=document.getElementById("bayarTarget");var nIn=document.getElementById("bayarNominal");if(!tSel||!nIn)return;
   if(!sid){tSel.innerHTML='<option value="">Pilih santri dulu</option>';nIn.value="";return;}
@@ -110,7 +149,7 @@ document.addEventListener("submit",function(e){
   e.preventDefault();e.stopImmediatePropagation();
   var sid=document.getElementById("bayarSantri").value;
   var parts=tv.slice(5).split("|");var m=parts[0];var ta=parts[1];
-  var nominal=Number(document.getElementById("bayarNominal").value);
+  var nominal=Number(rawNum(document.getElementById("bayarNominal").value));
   var metode=document.getElementById("bayarMetode").value;
   var tanggal=document.getElementById("bayarTanggal").value;
   var sp=getSpp(sid,ta);var c=sp&&sp.months[m];
@@ -124,9 +163,10 @@ document.addEventListener("submit",function(e){
   addLog("Pembayaran "+nama+" "+rupiah(nominal));
   saveState();render();showToast("Pembayaran tercatat ✅");
 },true);
+/* ---------- TUNGGAKAN & WA LINTAS TA ---------- */
 window.tunggakanList=function(){return state.santri.map(function(s){var ta=latestTA(s.id);var list=[];taListOf(s.id).slice().reverse().forEach(function(t){list=list.concat(sisaList(s.id,t));});return{s:s,ta:ta,sum:allSum(s.id),list:list};}).filter(function(v){return v.sum.sisa>0;}).sort(function(a,b){return b.sum.sisa-a.sum.sisa;});};
 window.waMessage=function(v){var lines=[];taListOf(v.s.id).slice().reverse().forEach(function(ta){sisaList(v.s.id,ta).forEach(function(x){lines.push("• "+x.label+": "+rupiah(x.sisa));});});if(!lines.length)lines.push("• (tidak ada tunggakan)");return "Assalamu'alaikum warahmatullahi wabarakatuh\nYth. Bapak/Ibu "+v.s.waliNama+", wali dari ananda *"+v.s.nama+"* (Kelas "+v.s.kelas+").\n\nBerikut keterangan administrasi (seluruh tahun ajaran) yang belum tertunaikan:\n"+lines.join("\n")+"\n\n*Total sisa: "+rupiah(v.sum.sisa)+"*\n\nKami ingatkan bahwa batas maksimal pembayaran SPP adalah *tanggal 10 setiap bulan*. Apabila Bapak/Ibu belum mampu membayar tepat waktu, mohon berkenan *konfirmasi/izin kepada Mudir* pondok terlebih dahulu.\n\nTerima kasih atas perhatian dan kerja samanya. Jazakumullah khairan katsiran.\n— Administrasi DQH AL-HUDA Sukoharjo";};
-/* ================= BARU v6: PEMBAYARAN GABUNGAN ================= */
+/* ---------- PEMBAYARAN GABUNGAN ---------- */
 function injectBulkBtns(){
   if(!(state.session&&state.session.role==="admin"))return;
   if(!document.getElementById("tableBayar"))return;
@@ -172,7 +212,8 @@ function buildBulkList(sid){
   var host=document.getElementById("bkList");if(!host)return;
   var rows=bulkRows(sid);window._bulkRows=rows;
   if(!rows.length){host.innerHTML='<div class="empty" style="padding:14px">Tidak ada tagihan belum lunas untuk santri ini.</div>';updateBulkTotal();return;}
-  host.innerHTML=rows.map(function(r,i){return '<div class="bk-row"><input type="checkbox" data-bk="'+i+'" checked/><div class="bk-l">'+esc(r.label)+'<div class="bk-s">Sisa '+rupiah(r.sisa)+'</div></div><input type="number" data-bkn="'+i+'" value="'+r.sisa+'"/></div>';}).join("");
+  host.innerHTML=rows.map(function(r,i){return '<div class="bk-row"><input type="checkbox" data-bk="'+i+'" checked/><div class="bk-l">'+esc(r.label)+'<div class="bk-s">Sisa '+rupiah(r.sisa)+'</div></div><input type="text" inputmode="numeric" data-bkn="'+i+'" value="'+fmtCur(r.sisa)+'"/></div>';}).join("");
+  host.querySelectorAll("input[data-bkn]").forEach(function(inp){inp.addEventListener("input",function(){inp.value=fmtCur(inp.value);updateBulkTotal();});});
   updateBulkTotal();
 }
 function updateBulkTotal(){
@@ -180,7 +221,7 @@ function updateBulkTotal(){
   host.querySelectorAll("input[type=checkbox]").forEach(function(cb){
     if(!cb.checked)return;
     var i=+cb.dataset.bk;var r=(window._bulkRows||[])[i];if(!r)return;
-    var inp=host.querySelector('input[data-bkn="'+i+'"]');var v=Number(inp&&inp.value)||0;
+    var inp=host.querySelector('input[data-bkn="'+i+'"]');var v=Number(rawNum(inp&&inp.value))||0;
     if(v>r.sisa)v=r.sisa;if(v<0)v=0;t+=v;
   });
   var el=document.getElementById("bkTotal");if(el)el.textContent="Total dipilih: "+rupiah(t);
@@ -193,7 +234,7 @@ function saveBulk(){
   host.querySelectorAll("input[type=checkbox]").forEach(function(cb){
     if(!cb.checked||err)return;
     var i=+cb.dataset.bk;var r=(window._bulkRows||[])[i];if(!r){err="Baris tidak valid";return;}
-    var inp=host.querySelector('input[data-bkn="'+i+'"]');var v=Number(inp&&inp.value)||0;
+    var inp=host.querySelector('input[data-bkn="'+i+'"]');var v=Number(rawNum(inp&&inp.value))||0;
     if(v<=0){err=r.label+": nominal harus lebih dari 0";return;}
     if(v>r.sisa){err=r.label+": melebihi sisa "+rupiah(r.sisa);return;}
     var metode=document.getElementById("bkMetode").value;var tanggal=document.getElementById("bkTanggal").value;
@@ -218,15 +259,17 @@ function saveBulk(){
   window._bulkPays=pays;window._lastBulkPays=pays;
   saveState();render();showToast(pays.length+" pembayaran tercatat ✅ Kwitansi gabungan terbit");
 }
-/* ---- Kwitansi gabungan ---- */
+/* ---------- KWITANSI GABUNGAN ---------- */
 function terbilang(n){var a=["","satu","dua","tiga","empat","lima","enam","tujuh","delapan","sembilan","sepuluh","sebelas"];function t(x){if(x<12)return a[x];if(x<20)return t(x-10)+" belas";if(x<100)return t(Math.floor(x/10))+" puluh "+t(x%10);if(x<200)return t(Math.floor(x/100))+" ratus "+t(x%100);if(x<1000)return t(Math.floor(x/100))+" ratus "+t(x%100);if(x<2000)return "seribu "+t(x-1000);if(x<1e6)return t(Math.floor(x/1000))+" ribu "+t(x%1000);if(x<1e9)return t(Math.floor(x/1e6))+" juta "+t(x%1e6);return "";}return (t(Math.floor(n))+" rupiah").replace(/\s+/g," ").trim();}
 function rr(c,X,Y,W,H,R){c.beginPath();c.moveTo(X+R,Y);c.arcTo(X+W,Y,X+W,Y+H,R);c.arcTo(X+W,Y+H,X,Y+H,R);c.arcTo(X,Y+H,X,Y,R);c.arcTo(X,Y,X+W,Y,R);c.closePath();}
 function openKwitansiGabungan(pays){
   var s=state.santri.find(function(x){return x.id===pays[0].santriId;})||{nama:"-",waliNama:"-",nik:"-",kelas:"-"};
   var total=pays.reduce(function(a,p){return a+p.nominal;},0);
   var sisa=allSum(s.id).sisa;
-  var img=new Image();img.onload=function(){draw(img);};img.onerror=function(){draw(null);};img.src="logo.png";
-  function draw(logo){
+  var _lg=null,_td=null,_dn=0;function _ck(){if(_dn>1)draw(_lg,_td);}
+  var img=new Image();img.onload=function(){_lg=img;_dn++;_ck();};img.onerror=function(){_dn++;_ck();};img.src="logo.png";
+  var img2=new Image();img2.onload=function(){_td=img2;_dn++;_ck();};img2.onerror=function(){_dn++;_ck();};img2.src="ttd.png";
+  function draw(logo,ttd){
     var W=900,H=1000+pays.length*44,cv=document.createElement("canvas");cv.width=W;cv.height=H;var c=cv.getContext("2d");
     c.fillStyle="#F4F9FA";c.fillRect(0,0,W,H);
     rr(c,24,24,W-48,H-48,28);c.fillStyle="#FFFFFF";c.fill();c.lineWidth=2;c.strokeStyle="#DCEBED";c.stroke();
@@ -253,7 +296,7 @@ function openKwitansiGabungan(pays){
     c.fillStyle="#FFFFFF";c.font="800 40px 'Segoe UI',Arial";c.fillText("Rp "+Number(total).toLocaleString("id-ID"),96,py+90);
     c.textAlign="left";c.fillStyle="#5E7680";c.font="italic 400 14px 'Segoe UI',Arial";c.fillText("Terbilang: "+terbilang(total),64,py+152);
     var sy=py+176;rr(c,64,sy,W-128,52,14);c.fillStyle="#FFF6E6";c.fill();c.lineWidth=1.5;c.strokeStyle="#FDBA74";c.stroke();c.fillStyle="#B54708";c.font="600 15px 'Segoe UI',Arial";c.fillText("Sisa seluruh kewajiban setelah pembayaran:  Rp "+Number(sisa).toLocaleString("id-ID"),92,sy+32);
-    var fy=H-232;c.textAlign="right";c.fillStyle="#12333A";c.font="600 15px 'Segoe UI',Arial";c.fillText("Sukoharjo, "+pays[0].tanggal,W-72,fy);c.fillText("Bendahara,",W-72,fy+26);c.strokeStyle="#9BB5BA";c.lineWidth=1;c.beginPath();c.moveTo(W-260,fy+96);c.lineTo(W-72,fy+96);c.stroke();c.fillStyle="#5E7680";c.font="400 13px 'Segoe UI',Arial";c.fillText("( ................................ )",W-72,fy+118);
+    var fy=H-232;c.textAlign="right";c.fillStyle="#12333A";c.font="600 15px 'Segoe UI',Arial";c.fillText("Sukoharjo, "+pays[0].tanggal,W-72,fy);c.fillText("TU (Tata Usaha),",W-72,fy+26);if(ttd){try{c.drawImage(ttd,W-242,fy+34,170,85);}catch(e){}}c.strokeStyle="#9BB5BA";c.lineWidth=1;c.beginPath();c.moveTo(W-260,fy+124);c.lineTo(W-72,fy+124);c.stroke();c.fillStyle="#12333A";c.font="700 14px 'Segoe UI',Arial";c.fillText("( Dinastiar )",W-72,fy+146);
     c.textAlign="center";c.fillStyle="#9BB5BA";c.font="400 12px 'Segoe UI',Arial";c.fillText("Kwitansi gabungan otomatis Portal Administrasi DQH AL-HUDA — sah tanpa stempel & tanda tangan basah.",W/2,H-56);
     showKwGabungan(cv,pays,s,total);
   }
@@ -278,11 +321,11 @@ function showKwGabungan(canvas,pays,s,total){
   box.appendChild(im);box.appendChild(act);mask.appendChild(box);document.body.appendChild(mask);
 }
 function closeKw(){var m=document.getElementById("kwMask");if(m)m.remove();}
-/* ---- MESIN ---- */
+/* ---------- MESIN ---------- */
 function postFin(){
-  injectFinance();nameItemsWithTA();injectAddItem();injectBulkBtns();
+  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();
   if(window._bulkPays){var ps=window._bulkPays;window._bulkPays=null;openKwitansiGabungan(ps);}
-  if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();}catch(e){}},60);}
+  if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();curifyPage();}catch(e){}},60);}
 }
 if(typeof window.render==="function"&&!window.render.__fin){var orig=window.render;window.render=function(){var r=orig.apply(null,arguments);try{postFin();}catch(e){}return r;};window.render.__fin=true;}
 setTimeout(postFin,350);
