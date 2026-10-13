@@ -77,7 +77,7 @@ function injectAddItem(){
   var card=document.createElement("div");card.className="card";card.id="addItemCard";
   card.innerHTML='<h3>➕ Tambah Tagihan Nonbulanan</h3><div class="fin-subtitle">Untuk menambahkan tagihan yang belum tercatat (mis. Ekstrakurikuler TA lama). Isi angka persis seperti di Braja.</div>'+
   '<label>Kategori</label><select id="aiKat">'+KATS.map(function(k){return '<option>'+k+'</option>';}).join("")+'</select>'+
-  '<label>Tahun Ajaran</label><input id="aiTa" value="2025/2026"/>'+
+  '<label>Tahun Ajaran</label><input id="aiTa" value="'+latestTA(sid)+'"/>'+
   '<label>Tarif</label><input id="aiTarif" type="number" value="0"/>'+
   '<label>Sudah terbayar</label><input id="aiBayar" type="number" value="0"/>'+
   '<button class="btn btn-primary btn-block mt" id="aiSave">➕ Tambah Tagihan</button>';
