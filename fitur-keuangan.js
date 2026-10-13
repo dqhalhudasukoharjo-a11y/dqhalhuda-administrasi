@@ -356,6 +356,27 @@ function cancelTrx(no){
   saveState();render();showToast("Transaksi "+p.no+" dibatalkan & sisa dikembalikan ✅");
 }
 document.addEventListener("click",function(e){var t=e.target.closest("[data-ft='cancel']");if(t)cancelTrx(t.getAttribute("data-no"));});
+/* ---------- BARU v9: HAPUS TAGIHAN NONBULANAN ---------- */
+function injectDeleteItem(){
+  if(!(state.session&&state.session.role==="admin"))return;
+  if(!document.getElementById("tarifSantriSel"))return;
+  var sid=state.tarifSantri;if(!sid)return;
+  if(document.getElementById("delItemCard"))return;
+  var host=document.querySelector(".admin-content .grid-2");if(!host)return;
+  var card=document.createElement("div");card.className="card";card.id="delItemCard";
+  var items=state.items.filter(function(i){return i.santriId===sid;});
+  card.innerHTML='<h3>🗑 Hapus Tagihan Nonbulanan</h3><div class="fin-subtitle">Untuk membuang tagihan yang salah input (kategori/TA/nominal). Pilih tagihan lalu hapus; perubahan tersinkron ke semua perangkat.</div>'+
+  '<label>Pilih tagihan</label><select id="diSel">'+(items.length?items.map(function(i){return '<option value="'+i.id+'">'+esc(i.nama)+' — sisa '+rupiah(i.tarif-i.terbayar)+'</option>';}).join(""):'<option value="">(tidak ada tagihan)</option>')+'</select>'+
+  '<button class="btn btn-danger btn-block mt" id="diSave">🗑 Hapus Tagihan Ini</button>';
+  host.appendChild(card);
+  document.getElementById("diSave").onclick=function(){
+    var id=document.getElementById("diSel").value;if(!id){showToast("Tidak ada tagihan untuk dihapus","error");return;}
+    var it=state.items.find(function(x){return x.id===id;});if(!it)return;
+    if(!window.confirm("Hapus tagihan "+it.nama+" untuk santri ini?\nSisa "+rupiah(it.tarif-it.terbayar)+" akan hilang dari tagihan wali."))return;
+    state.items=state.items.filter(function(x){return x.id!==id;});
+    saveState();render();showToast("Tagihan "+it.nama+" dihapus ✅");
+  };
+}
 /* ---------- MESIN ---------- */
 function postFin(){
   injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();
