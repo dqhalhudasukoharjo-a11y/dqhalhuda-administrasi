@@ -379,7 +379,7 @@ function injectDeleteItem(){
 }
 /* ---------- MESIN ---------- */
 function postFin(){
-  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();
+  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();injectDeleteItem();
   if(window._bulkPays){var ps=window._bulkPays;window._bulkPays=null;openKwitansiGabungan(ps);}
   if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();curifyPage();}catch(e){}},60);}
 }
