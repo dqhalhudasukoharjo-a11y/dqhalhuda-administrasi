@@ -73,6 +73,7 @@ function injectAddItem(){
   if(!(state.session&&state.session.role==="admin"))return;
   if(!document.getElementById("tarifSantriSel"))return;
   if(document.getElementById("addItemCard"))return;
+  var sid=state.tarifSantri;if(!sid)return;
   var host=document.querySelector(".admin-content .grid-2");if(!host)return;
   var card=document.createElement("div");card.className="card";card.id="addItemCard";
   card.innerHTML='<h3>➕ Tambah Tagihan Nonbulanan</h3><div class="fin-subtitle">Untuk menambahkan tagihan yang belum tercatat (mis. Ekstrakurikuler TA lama). Isi angka persis seperti di Braja.</div>'+
