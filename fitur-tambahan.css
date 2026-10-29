@@ -173,3 +173,35 @@ body .bill-list>*{min-width:0}
 body .bill-card{min-width:0}
 @media(min-width:640px){body .wh-top [data-ft="theme"]{display:none}}
 
+/* ==== v6: tata letak halaman tarif + polesan kreatif menyeluruh ==== */
+@media(min-width:1000px){
+  body .grid-2.ft-tarifgrid{grid-template-columns:repeat(6,1fr);align-items:start}
+  body .grid-2.ft-tarifgrid>.ft-a,body .grid-2.ft-tarifgrid>.ft-b{grid-column:span 3}
+  body .grid-2.ft-tarifgrid>.ft-aux{grid-column:span 2}
+}
+@media(min-width:640px) and (max-width:999px){
+  body .grid-2.ft-tarifgrid{grid-template-columns:repeat(2,1fr)}
+  body .grid-2.ft-tarifgrid>.ft-a,body .grid-2.ft-tarifgrid>.ft-b{grid-column:span 2}
+  body .grid-2.ft-tarifgrid>.ft-aux{grid-column:span 1}
+}
+body .card{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
+body .card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#0B7285,#12B0BE 55%,transparent);opacity:0;transition:opacity .25s}
+body .card:hover{transform:translateY(-2px);box-shadow:0 16px 38px rgba(7,59,68,.14)}
+body .card:hover::before{opacity:1}
+body input:focus,body select:focus,body textarea:focus{border-color:#12B0BE;box-shadow:0 0 0 3px rgba(18,176,190,.18);outline:none}
+body .btn{transition:transform .12s ease,filter .2s ease}
+body .btn:hover{filter:brightness(1.06)}
+body .btn:active{transform:scale(.97)}
+body .stat-card{position:relative;overflow:hidden}
+body .stat-card::after{content:"";position:absolute;top:-60%;left:-30%;width:40%;height:220%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:rotate(12deg) translateX(-180%);transition:transform .65s ease}
+body .stat-card:hover::after{transform:rotate(12deg) translateX(340%)}
+body tbody tr{transition:background .15s}
+body .insight-banner{position:relative;overflow:hidden}
+body .insight-banner::after{content:"";position:absolute;right:-40px;top:-40px;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%)}
+body::-webkit-scrollbar,body .fin-scroll::-webkit-scrollbar,body .table-wrap::-webkit-scrollbar{width:8px;height:8px}
+body::-webkit-scrollbar-thumb,body .fin-scroll::-webkit-scrollbar-thumb,body .table-wrap::-webkit-scrollbar-thumb{background:rgba(11,114,133,.35);border-radius:99px}
+body::-webkit-scrollbar-thumb:hover{background:rgba(11,114,133,.55)}
+body .splash-logo,body .login-logoimg{animation:ftFloat 3.2s ease-in-out infinite}
+@keyframes ftFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+html[data-theme="gelap"] body .card:hover{box-shadow:0 16px 38px rgba(0,0,0,.45)}
+html[data-theme="gelap"] body input:focus,html[data-theme="gelap"] body select:focus{box-shadow:0 0 0 3px rgba(18,176,190,.25)}
