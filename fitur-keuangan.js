@@ -416,9 +416,22 @@ function injectMulaiCard(){
     saveState();render();showToast("SPP sebelum "+MONTH_ID[MONTHS[mi]]+" dinol-kan ✅ ("+n+" bulan dibersihkan)");
   };
 }
+/* ---------- BARU v11: TATA LETAK HALAMAN TARIF ---------- */
+function layoutTarif(){
+  if(!(state.session&&state.session.role==="admin"))return;
+  if(!document.getElementById("tarifSantriSel"))return;
+  var host=document.querySelector(".admin-content .grid-2");if(!host)return;
+  host.classList.add("ft-tarifgrid");
+  var ids=["createSppCard","mulaiCard","addItemCard","delItemCard"];
+  var mains=Array.prototype.slice.call(host.children).filter(function(k){return ids.indexOf(k.id)===-1;});
+  mains.forEach(function(k,i){k.classList.remove("ft-a","ft-b");k.classList.add(i===0?"ft-a":"ft-b");});
+  ids.forEach(function(id){var el=document.getElementById(id);if(el)el.classList.add("ft-aux");});
+  mains.forEach(function(k){host.appendChild(k);});
+  ids.forEach(function(id){var el=document.getElementById(id);if(el)host.appendChild(el);});
+}
 /* ---------- MESIN ---------- */
 function postFin(){
- injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();injectDeleteItem();injectMulaiCard();
+ injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();injectDeleteItem();injectMulaiCard();layoutTarif();
   if(window._bulkPays){var ps=window._bulkPays;window._bulkPays=null;openKwitansiGabungan(ps);}
   if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();curifyPage();}catch(e){}},60);}
 }
