@@ -109,7 +109,8 @@ function injectCreateSpp(){
   var card=document.createElement("div");card.className="card";card.id="createSppCard";
   card.innerHTML='<h3>📅 Buat Catatan SPP 12 Bulan</h3><div class="fin-subtitle">Santri ini belum punya catatan SPP untuk TA berjalan. Buat dulu supaya bulan JUL–JUN tertagih dan bisa dibayar.</div>'+
   '<label>Tahun Ajaran</label><input id="csTa" value="'+latestTA(sid)+'"/>'+
-  '<label>Tarif SPP per bulan</label><input id="csTarif" type="number" value="0"/>'+
+    '<label>Tarif SPP per bulan</label><input id="csTarif" type="number" value="0"/>'+
+  '<label>Bulan mulai tagih (santri pindahan)</label><select id="csMulai">'+MONTHS.map(function(m){return '<option value="'+m+'">'+MONTH_ID[m]+'</option>';}).join("")+'</select>'+
   '<button class="btn btn-primary btn-block mt" id="csSave">📅 Buat & Tagihkan 12 Bulan</button>';
   host.insertBefore(card,host.firstChild);
   document.getElementById("csSave").onclick=function(){
@@ -118,8 +119,9 @@ function injectCreateSpp(){
     if(!/^\d{4}\/\d{4}$/.test(ta)){showToast("Format TA salah (contoh 2026/2027)","error");return;}
     if(t<=0){showToast("Tarif harus lebih dari 0","error");return;}
     if(getSpp(sid,ta)){showToast("Catatan SPP TA "+ta+" sudah ada","error");return;}
-    var months={};MONTHS.forEach(function(m){months[m]={t:t,b:0};});
-    state.spp.push({id:uid(),santriId:sid,ta:ta,tarif:t,months:months});
+    var mi=MONTHS.indexOf(document.getElementById("csMulai").value);if(mi<0)mi=0;
+    var months={};MONTHS.forEach(function(m,i){months[m]=(i>=mi)?{t:t,b:0}:{t:0,b:0};});
+    state.spp.push({id:uid(),santriId:sid,ta:ta,tarif:t,mulai:MONTHS[mi],months:months});
     saveState();render();showToast("Catatan SPP 12 bulan dibuat ✅ Santri siap dibayarkan");
   };
 }
@@ -357,30 +359,45 @@ function cancelTrx(no){
   saveState();render();showToast("Transaksi "+p.no+" dibatalkan & sisa dikembalikan ✅");
 }
 document.addEventListener("click",function(e){var t=e.target.closest("[data-ft='cancel']");if(t)cancelTrx(t.getAttribute("data-no"));});
-/* ---------- BARU v9: HAPUS TAGIHAN NONBULANAN ---------- */
-function injectDeleteItem(){
+/* ---------- BARU v10: BULAN MULAI TAGIH (PINDAHAN) ---------- */
+document.addEventListener("submit",function(e){
+  var f=e.target;if(!f||!f.dataset||f.dataset.form!=="set-spp")return;
+  e.preventDefault();e.stopImmediatePropagation();
+  var sid=state.tarifSantri;if(!sid)return;
+  var sp=getSpp(sid,latestTA(sid));if(!sp){showToast("Santri belum punya catatan SPP","error");return;}
+  var inp=f.querySelector("input");var rate=Number(rawNum(inp&&inp.value))||0;
+  if(rate<=0){showToast("Tarif harus lebih dari 0","error");return;}
+  var mi=MONTHS.indexOf(sp.mulai||"JUL");if(mi<0)mi=0;
+  sp.tarif=rate;
+  MONTHS.forEach(function(m,i){var c=sp.months[m]||{t:0,b:0};if(i>=mi){c.t=rate;}else{c.t=0;c.b=0;}sp.months[m]=c;});
+  saveState();render();showToast("Tarif SPP diterapkan mulai "+MONTH_ID[MONTHS[mi]]+" ✅ Bulan sebelumnya Rp 0");
+},true);
+function injectMulaiCard(){
   if(!(state.session&&state.session.role==="admin"))return;
   if(!document.getElementById("tarifSantriSel"))return;
   var sid=state.tarifSantri;if(!sid)return;
-  if(document.getElementById("delItemCard"))return;
+  var sp=getSpp(sid,latestTA(sid));if(!sp)return;
+  if(document.getElementById("mulaiCard"))return;
   var host=document.querySelector(".admin-content .grid-2");if(!host)return;
-  var card=document.createElement("div");card.className="card";card.id="delItemCard";
-  var items=state.items.filter(function(i){return i.santriId===sid;});
-  card.innerHTML='<h3>🗑 Hapus Tagihan Nonbulanan</h3><div class="fin-subtitle">Untuk membuang tagihan yang salah input (kategori/TA/nominal). Pilih tagihan lalu hapus; perubahan tersinkron ke semua perangkat.</div>'+
-  '<label>Pilih tagihan</label><select id="diSel">'+(items.length?items.map(function(i){return '<option value="'+i.id+'">'+esc(i.nama)+' — sisa '+rupiah(i.tarif-i.terbayar)+'</option>';}).join(""):'<option value="">(tidak ada tagihan)</option>')+'</select>'+
-  '<button class="btn btn-danger btn-block mt" id="diSave">🗑 Hapus Tagihan Ini</button>';
+  var card=document.createElement("div");card.className="card";card.id="mulaiCard";
+  card.innerHTML='<h3>✂️ Bulan Mulai Tagih (Santri Pindahan)</h3><div class="fin-subtitle">Nol-kan SPP sebelum bulan masuk santri supaya tidak menjadi tunggakan. Bulan sebelum pilihan menjadi Rp 0; bulan seterusnya tetap tertagih.</div>'+
+  '<label>Santri mulai masuk bulan</label><select id="muSel">'+MONTHS.map(function(m){return '<option value="'+m+'"'+((sp.mulai||"JUL")===m?" selected":"")+'>'+MONTH_ID[m]+'</option>';}).join("")+'</select>'+
+  '<button class="btn btn-primary btn-block mt" id="muSave">✂️ Terapkan Bulan Mulai</button>';
   host.appendChild(card);
-  document.getElementById("diSave").onclick=function(){
-    var id=document.getElementById("diSel").value;if(!id){showToast("Tidak ada tagihan untuk dihapus","error");return;}
-    var it=state.items.find(function(x){return x.id===id;});if(!it)return;
-    if(!window.confirm("Hapus tagihan "+it.nama+" untuk santri ini?\nSisa "+rupiah(it.tarif-it.terbayar)+" akan hilang dari tagihan wali."))return;
-    state.items=state.items.filter(function(x){return x.id!==id;});
-    saveState();render();showToast("Tagihan "+it.nama+" dihapus ✅");
+  document.getElementById("muSave").onclick=function(){
+    var mi=MONTHS.indexOf(document.getElementById("muSel").value);if(mi<0)mi=0;
+    var bayar=0;
+    MONTHS.forEach(function(m,i){var c=sp.months[m]||{t:0,b:0};if(i<mi&&c.b>0)bayar++;});
+    if(bayar>0&&!window.confirm("Ada "+bayar+" bulan sebelum bulan mulai yang sudah punya pembayaran. Lanjutkan menol-kan bulan tersebut? (Batalkan dulu transaksinya lewat tombol 🗑 bila perlu.)"))return;
+    var n=0;
+    MONTHS.forEach(function(m,i){var c=sp.months[m]||{t:0,b:0};if(i<mi){if(c.t>0)n++;c.t=0;c.b=0;}sp.months[m]=c;});
+    sp.mulai=MONTHS[mi];
+    saveState();render();showToast("SPP sebelum "+MONTH_ID[MONTHS[mi]]+" dinol-kan ✅ ("+n+" bulan dibersihkan)");
   };
 }
 /* ---------- MESIN ---------- */
 function postFin(){
-  injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();injectDeleteItem();
+ injectFinance();nameItemsWithTA();injectAddItem();injectCreateSpp();injectBulkBtns();curifyPage();injectCancelBtns();injectDeleteItem();injectMulaiCard();
   if(window._bulkPays){var ps=window._bulkPays;window._bulkPays=null;openKwitansiGabungan(ps);}
   if(document.getElementById("bayarSantri")&&!window._pbOnce){window._pbOnce=1;setTimeout(function(){try{populateBayar();curifyPage();}catch(e){}},60);}
 }
